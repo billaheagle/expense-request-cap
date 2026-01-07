@@ -1,0 +1,6 @@
+Code,Description,ReceiptRequired,MaxAmount,Active
+MEAL,Meals,false,50,true
+HOTEL,Hotel,true,,true
+TRAVEL,Travel,true,,true
+TAXI,Taxi,false,30,true
+OFFICE,Office Supplies,false,100,true

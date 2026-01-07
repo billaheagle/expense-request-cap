@@ -1,0 +1,101 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Dialog
+        id="itemDialog"
+        title="Expense Item Details"
+        class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
+    >
+        <content>
+            <VBox
+                id="itemDialogVBox"
+                class="sapUiSmallMargin"
+            >
+                <Label
+                    id="itemDialogLabelType"
+                    text="Expense Type ID"
+                />
+                <Input
+                    id="itemDialogInputType"
+                    value="{item>/ExpenseType_Code}"
+                    showValueHelp="true"
+                    valueHelpRequest=".onExpenseTypeValueHelp"
+                    valueState="{item>/_ExpenseType_CodeState}"
+                    valueStateText="Expense Type is required"
+                    liveChange=".onValidateItem"
+                    width="100%"
+                    class="sapUiSmallMarginBottom"
+                />
+
+                <Label
+                    id="itemDialogLabelDate"
+                    text="Date"
+                />
+                <DatePicker
+                    id="itemDialogInputDate"
+                    value="{item>/ExpenseDate}"
+                    valueFormat="yyyy-MM-dd"
+                    displayFormat="dd/MM/yyyy"
+                    valueState="{item>/_ExpenseDateState}"
+                    valueStateText="ExpenseDate is required"
+                    change=".onValidateItem"
+                    width="100%"
+                    class="sapUiSmallMarginBottom"
+                />
+
+                <Label
+                    id="itemDialogLabelAmount"
+                    text="Amount"
+                />
+                <Input
+                    id="itemDialogInputAmount"
+                    value="{item>/Amount}"
+                    valueState="{item>/_AmountState}"
+                    valueStateText="Amount is required"
+                    liveChange=".onValidateItem"
+                    width="100%"
+                    class="sapUiSmallMarginBottom"
+                    type="Number"
+                />
+
+                <Label
+                    id="itemDialogLabelDescription"
+                    text="Description"
+                />
+                <TextArea
+                    id="itemDialogInputDescription"
+                    placeholder="Enter expense details here..."
+                    value="{item>/Description}"
+                    rows="4"
+                    width="100%"
+                    growing="true"
+                    growingMaxLines="6"
+                    maxLength="255"
+                    showExceededText="true"
+                />
+
+                <HBox
+                    id="itemDialogHBoxButtons"
+                    justifyContent="End"
+                    class="sapUiSmallMarginTop"
+                >
+                    <Button
+                        id="itemDialogBtnCancel"
+                        text="Cancel"
+                        press=".onCloseItemDialog"
+                        type="Reject"
+                    />
+                    <Button
+                        id="itemDialogBtnSave"
+                        text="Save"
+                        press=".onSaveItemDialog"
+                        class="sapUiSmallMarginBegin"
+                        type="Accept"
+                        enabled="{= ${item>/_isValid} === true }"
+                    />
+                </HBox>
+            </VBox>
+        </content>
+    </Dialog>
+</core:FragmentDefinition>

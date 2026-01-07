@@ -1,0 +1,75 @@
+<mvc:View
+    controllerName="expenseapproval.controller.ExpenseApproval"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    displayBlock="true"
+>
+    <Page
+        id="_IDGenPage3"
+        title="{i18n>title}"
+    >
+        <Panel id="_IDGenPanel">
+            <content>
+                <FlexBox
+                    id="tileFlexBox"
+                    wrap="Wrap"
+                    justifyContent="Start"
+                    alignItems="Start"
+                >
+                    <GenericTile
+                        id="_IDGenGenericTile"
+                        header="Request Expense"
+                        press=".onRequestPage"
+                    >
+                        <tileContent>
+                            <TileContent id="_IDGenTileContent1">
+                                <content>
+                                    <Text
+                                        id="_IDGenText"
+                                        text="Request a new expense"
+                                    />
+                                </content>
+                            </TileContent>
+                        </tileContent>
+                    </GenericTile>
+
+                    <GenericTile
+                        id="_IDGenGenericTile1"
+                        header="Report Expenses"
+                        press=".onReportPage"
+                        class="sapUiSmallMarginBegin"
+                    >
+                        <tileContent>
+                            <TileContent id="_IDGenTileContent2">
+                                <content>
+                                    <Text
+                                        id="_IDGenText1"
+                                        text="View your expenses"
+                                    />
+                                </content>
+                            </TileContent>
+                        </tileContent>
+                    </GenericTile>
+
+                    <GenericTile
+                        id="_IDGenGenericTile2"
+                        header="Approval"
+                        press=".onApprovalPage"
+                        class="sapUiSmallMarginBegin"
+                    >
+                        <tileContent>
+                            <TileContent id="_IDGenTileContent3">
+                                <content>
+                                    <Text
+                                        id="_IDGenText2"
+                                        text="View your approvals"
+                                    />
+                                </content>
+                            </TileContent>
+                        </tileContent>
+                    </GenericTile>
+                </FlexBox>
+            </content>
+        </Panel>
+    </Page>
+</mvc:View>

@@ -1,0 +1,159 @@
+{
+  "_version": "1.76.0",
+  "sap.app": {
+    "id": "expenseapproval",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.19.1",
+      "toolsId": "cd237688-58e4-4385-a702-51e6458eebcb"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/expense/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      },
+      "masterDataService": {
+        "uri": "/odata/v4/master-data/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.143.2",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "expenseapproval.i18n.i18n"
+        }
+      },
+      "": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true,
+          "httpHeaders": {
+            "Authorization": "Basic ZW1wbG95ZWVAY29tcGFueS5jb206MTIzNDU2"
+          }
+        }
+      },
+      "masterData": {
+        "dataSource": "masterDataService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "expenseapproval.view",
+        "async": true,
+        "viewPath": "expenseapproval.view"
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "home",
+          "target": "home"
+        },
+        {
+          "pattern": "request",
+          "name": "request",
+          "target": "request"
+        },
+        {
+          "pattern": "report",
+          "name": "report",
+          "target": "report"
+        },
+        {
+          "pattern": "approval",
+          "name": "approval",
+          "target": "approval"
+        }
+      ],
+      "targets": {
+        "home": {
+          "viewName": "ExpenseApproval"
+        },
+        "request": {
+          "viewName": "Request"
+        },
+        "report": {
+          "viewName": "Report"
+        },
+        "approval": {
+          "viewName": "Approval"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "expenseapproval.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}
