@@ -5,15 +5,124 @@
 >
     <Page
         id="idReportPage"
-        title="My Expense Requests"
+        title="{i18n>reportTitle}"
         showNavButton="true"
         navButtonPress=".onPageReportExpenseNavButtonPress"
     >
         <content>
-            <Text
-                id="idReportExpenseGoesHereText"
-                text="Report Expense goes here"
-            />
+            <Table
+                id="idExpenseRequestsReportTable"
+                width="auto"
+                items="{
+                    path: '/ExpenseRequests',
+                    sorter: {
+                        path: 'SubmissionDate',
+                        descending: true
+                    }
+                }"
+                noDataText="No expense requests found"
+                class="sapUiResponsiveMargin"
+            >
+                <headerToolbar>
+                    <OverflowToolbar id="idReportOverflowToolbar">
+                        <Title
+                            id="idRequestsReportToolbarTitle"
+                            text="Requests"
+                        />
+                        <ToolbarSpacer id="idReportToolbarSpacer" />
+                        <SearchField
+                            id="idReportSearchField"
+                            width="30%"
+                            placeholder="{i18n>reportSearchPlaceholder}"
+                            search=".onSearchFieldReportSearch"
+                        />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column id="idRequestNumberColumn">
+                        <Text
+                            id="idRequestNumberColumnText"
+                            text="{i18n>reportColRequestNumber}"
+                        />
+                    </Column>
+                    <Column
+                        id="idSubmissionDateColumn"
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            id="idSubmissionDateColumnText"
+                            text="{i18n>reportColSubmissionDate}"
+                        />
+                    </Column>
+                    <Column
+                        id="idNotesColumn"
+                        minScreenWidth="Desktop"
+                        demandPopin="true"
+                    >
+                        <Text
+                            id="idNotesColumnText"
+                            text="{i18n>reportColNotes}"
+                        />
+                    </Column>
+                    <Column
+                        id="idTotalAmountColumn"
+                        hAlign="End"
+                    >
+                        <Text
+                            id="idTotalAmountColumnText"
+                            text="{i18n>reportColTotalAmount}"
+                        />
+                    </Column>
+                    <Column
+                        id="idStatusColumn"
+                        hAlign="Center"
+                    >
+                        <Text
+                            id="idStatusColumnText"
+                            text="{i18n>reportColStatus}"
+                        />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem
+                        id="idReportColumnListItem"
+                        type="Active"
+                    >
+                        <cells>
+                            <ObjectIdentifier
+                                id="idRequestNumberObjectIdentifier"
+                                title="{RequestNumber}"
+                            />
+                            <Text
+                                id="idSubmissionDateText"
+                                text="{path: 'SubmissionDate', formatter: '.formatDate'}"
+                            />
+                            <Text
+                                id="idNotesText"
+                                text="{Notes}"
+                            />
+                            <ObjectNumber
+                                id="idTotalAmountObjectNumber"
+                                number="{
+                                    path: 'TotalAmount',
+                                    type: 'sap.ui.model.type.Decimal',
+                                    formatOptions: {
+                                        minFractionDigits: 2,
+                                        maxFractionDigits: 2
+                                    }
+                                }"
+                                unit="{Currency_code}"
+                            />
+                            <ObjectStatus
+                                id="idStatusObjectStatus"
+                                text="{Status}"
+                                state="{path: 'Status', formatter: '.formatStatusState'}"
+                            />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
         </content>
     </Page>
 </mvc:View>

@@ -5,15 +5,137 @@
 >
     <Page
         id="idApprovalPage"
-        title="Approval Expense"
+        title="{i18n>approvalTitle}"
         showNavButton="true"
         navButtonPress=".onPageApprovalExpenseNavButtonPress"
     >
         <content>
-            <Text
-                id="idApprovalExpenseFormGoesHereText"
-                text="Approval Expense Form goes here"
-            />
+            <Table
+                id="idExpenseRequestsSubmittedRequestsTable"
+                width="auto"
+                items="{
+                    path: '/ExpenseRequests',
+                    filters: {
+                        path: 'Status',
+                        operator: 'EQ',
+                        value1: 'Submitted'
+                    },
+                    sorter: {
+                        path: 'SubmissionDate',
+                        descending: false
+                    }
+                }"
+                noDataText="{i18n>approvalNoRequests}"
+                class="sapUiResponsiveMargin"
+            >
+                <headerToolbar>
+                    <OverflowToolbar id="idApprovalOverflowToolbar">
+                        <Title
+                            id="idPendingApprovalsRequestsApprovalToolbarTitle"
+                            text="Pending Approvals"
+                        />
+                        <ToolbarSpacer id="idApprovalToolbarSpacer" />
+                        <SearchField
+                            id="idApprovalSearchField"
+                            width="30%"
+                            placeholder="{i18n>reportSearchPlaceholder}"
+                            search=".onSearchFieldApprovalSearch"
+                        />
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column id="idRequestNumberApprovalColumn">
+                        <Text
+                            id="idRequestNumberApprovalColumnText"
+                            text="{i18n>reportColRequestNumber}"
+                        />
+                    </Column>
+                    <Column id="idEmployeeApprovalColumn">
+                        <Text
+                            id="idEmployeeApprovalColumnText"
+                            text="{i18n>approvalColEmployee}"
+                        />
+                    </Column>
+                    <Column
+                        id="idSubmissionDateApprovalColumn"
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            id="idSubmissionDateApprovalColumnText"
+                            text="{i18n>reportColSubmissionDate}"
+                        />
+                    </Column>
+                    <Column
+                        id="idTotalAmountApprovalColumn"
+                        hAlign="End"
+                    >
+                        <Text
+                            id="idTotalAmountApprovalColumnText"
+                            text="{i18n>reportColTotalAmount}"
+                        />
+                    </Column>
+                    <Column
+                        id="idActionsApprovalColumn"
+                        hAlign="End"
+                    >
+                        <Text
+                            id="idActionsApprovalColumnText"
+                            text="Actions"
+                        />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem id="idApprovalColumnListItem">
+                        <cells>
+                            <ObjectIdentifier
+                                id="idRequestNumberApprovalObjectIdentifier"
+                                title="{RequestNumber}"
+                            />
+                            <Text
+                                id="idEmployeeNameApprovalText"
+                                text="{Employee/FirstName} {Employee/LastName}"
+                            />
+                            <Text
+                                id="idSubmissionDateApprovalText"
+                                text="{path: 'SubmissionDate', formatter: '.formatDate'}"
+                            />
+                            <ObjectNumber
+                                id="idTotalAmountApprovalObjectNumber"
+                                number="{
+                                    path: 'TotalAmount',
+                                    type: 'sap.ui.model.type.Decimal',
+                                    formatOptions: {
+                                        minFractionDigits: 2,
+                                        maxFractionDigits: 2
+                                    }
+                                }"
+                                unit="{Currency_code}"
+                            />
+                            <HBox
+                                id="idApprovalActionsHBox"
+                                justifyContent="End"
+                            >
+                                <Button
+                                    id="idApproveButton"
+                                    icon="sap-icon://accept"
+                                    type="Success"
+                                    press=".onButtonApprovePress"
+                                    tooltip="{i18n>approvalBtnApprove}"
+                                />
+                                <Button
+                                    id="idRejectButton"
+                                    icon="sap-icon://decline"
+                                    type="Reject"
+                                    press=".onButtonRejectPress"
+                                    class="sapUiTinyMarginBegin"
+                                    tooltip="{i18n>approvalBtnReject}"
+                                />
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
         </content>
     </Page>
 </mvc:View>
