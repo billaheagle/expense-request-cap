@@ -1,18 +1,17 @@
 <mvc:View
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core"
     xmlns="sap.m"
     controllerName="expenseapproval.controller.Approval"
 >
     <Page
-        id="approvalPage"
+        id="idApprovalPage"
         title="Approval Expense"
         showNavButton="true"
-        navButtonPress=".onNavBack"
+        navButtonPress=".onPageApprovalExpenseNavButtonPress"
     >
         <content>
             <Text
-                id="_IDGenText7"
+                id="idApprovalExpenseFormGoesHereText"
                 text="Approval Expense Form goes here"
             />
         </content>

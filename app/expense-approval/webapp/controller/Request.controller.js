@@ -1,11 +1,18 @@
 sap.ui.define(
-  ["sap/ui/core/mvc/Controller", "sap/m/MessageBox"],
-  function (Controller, MessageBox) {
+  [
+    "sap/ui/core/mvc/Controller",
+    "sap/m/MessageBox",
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/BindingMode",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem",
+  ],
+  function (Controller, MessageBox, JSONModel, BindingMode, SelectDialog, StandardListItem) {
     "use strict";
 
-    return Controller.extend("expense.ui.controller.Request", {
+    return Controller.extend("expenseapproval.controller.Request", {
       /* ===========================
-       INITIALIZATION & NAVIGATION
+       LIFECYCLE METHODS
        =========================== */
       onInit() {
         const oHeader = {
@@ -14,46 +21,67 @@ sap.ui.define(
         };
 
         // Create Header model with TwoWay binding
-        const oHeaderModel = new sap.ui.model.json.JSONModel(oHeader);
-        oHeaderModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+        const oHeaderModel = new JSONModel(oHeader);
+        oHeaderModel.setDefaultBindingMode(BindingMode.TwoWay);
         this.getView().setModel(oHeaderModel, "header");
 
         // Create items model with TwoWay binding
-        const oItemsModel = new sap.ui.model.json.JSONModel({ items: [] });
-        oItemsModel.setDefaultBindingMode(sap.ui.model.BindingMode.TwoWay);
+        const oItemsModel = new JSONModel({ items: [] });
+        oItemsModel.setDefaultBindingMode(BindingMode.TwoWay);
         this.getView().setModel(oItemsModel, "items");
       },
 
-      onNavBack() {
+      /* ===========================
+       EVENT HANDLERS
+       =========================== */
+      onPageCreateExpenseNavButtonPress() {
         // Navigate back to home route
         this.getOwnerComponent().getRouter().navTo("home");
       },
 
-      onCloseItemDialog: function () {
-        // Close item dialog if open
-        if (this._itemDialog) {
-          this._itemDialog.close();
-        }
-      },
-
-      onAddItem: function () {
+      onAddNewItemButtonPress: function () {
         // Open item dialog with default empty ite
         this._loadItemDialog();
 
         const oItem = {
           ExpenseType_Code: "",
-          ExpenseDate: this.formatDateToYYYYMMDD(new Date()),
+          ExpenseDate: this._formatDateToYYYYMMDD(new Date()),
           Amount: null,
           Description: "",
         };
 
-        const oDialogModel = new sap.ui.model.json.JSONModel(oItem);
+        const oDialogModel = new JSONModel(oItem);
         this._itemDialog.setModel(oDialogModel, "item");
         this._itemDialog.data("mode", "new");
         this._itemDialog.open();
       },
 
-      onSaveItemDialog: function () {
+      onButtonEditItemPress: function (oEvent) {
+        const index = this._getIndexItems(oEvent);
+        const oItemsModel = this.getView().getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+
+        if (index >= 0 && index < aItems.length) {
+          const oDialogModel = new JSONModel(aItems[index]);
+          this._itemDialog.setModel(oDialogModel, "item");
+          this._itemDialog.data("mode", "edit");
+          this._itemDialog.data("index", index);
+          this._itemDialog.open();
+        }
+      },
+
+      onButtonDeleteItemPress: function (oEvent) {
+        const index = this._getIndexItems(oEvent);
+        const oItemsModel = this.getView().getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+
+        if (index >= 0 && index < aItems.length) {
+          aItems.splice(index, 1); // remove 1 element at position iIndex
+          oItemsModel.setProperty("/items", aItems); // update model
+        }
+      },
+
+      onSaveButtonItemDialogPress: function () {
         // Save item data into items model
         const oItemData = this._itemDialog.getModel("item").getData();
         const oItemsModel = this.getView().getModel("items");
@@ -72,20 +100,139 @@ sap.ui.define(
         oItemsModel.setProperty("/items", aItems);
 
         this._itemDialog.close();
-        this.validateHeader();
+        this._validateHeader();
+      },
+
+      onCancelButtonItemDialogPress: function () {
+        // Close item dialog if open
+        if (this._itemDialog) {
+          this._itemDialog.close();
+        }
+      },
+
+      onCurrencyInputLiveChange: function (oEvent) {
+        const oModel = this.getView().getModel("header");
+        this._onFillInputItem(oEvent, oModel);
+        this._validateHeader();
+      },
+
+      onExpenseNotesTextAreaLiveChange: function (oEvent) {
+        const oModel = this.getView().getModel("header");
+        this._onFillInputItem(oEvent, oModel);
+        this._validateHeader();
+      },
+
+      onExpenseTypeCodeInputLiveChange: function (oEvent) {
+        // Combined input fill + validation
+        const oModel = this._itemDialog.getModel("item");
+        this._onFillInputItem(oEvent, oModel);
+        this._validateItem();
+      },
+
+      onExpenseDateDatePickerChange: function (oEvent) {
+        // Combined input fill + validation
+        const oModel = this._itemDialog.getModel("item");
+        this._onFillInputItem(oEvent, oModel);
+        this._validateItem();
+      },
+
+      onAmountInputLiveChange: function (oEvent) {
+        // Combined input fill + validation
+        const oModel = this._itemDialog.getModel("item");
+        this._onFillInputItem(oEvent, oModel);
+        this._validateItem();
+      },
+
+      onSaveAsDraftButtonPress: async function () {
+        const id = await this._draft();
+
+        if (id) {
+          MessageBox.success("Expense request Saved successfully!", {
+            onClose: () => {
+              // Clear form data
+              this._clearForm();
+              // Navigate back to home or refresh
+              this.onPageCreateExpenseNavButtonPress();
+            },
+          });
+        }
+      },
+
+      onSubmitRequestButtonPress: async function () {
+        const id = await this._draft();
+
+        if (id) {
+          await this._submit(id);
+        }
+      },
+
+      onCurrencyInputValueHelpRequest: function (oEvent) {
+        const oInput = oEvent.getSource();
+        const oView = this.getView();
+        const oModel = this.getView().getModel("header");
+        const oData = oModel.getData();
+
+        if (!this._currencyDialog) {
+          this._currencyDialog = new SelectDialog({
+            title: "Select Currency",
+            items: {
+              path: "/Currencies",
+              template: new StandardListItem({
+                title: "{code}",
+                description: "{name}",
+              }),
+            },
+            confirm: (oEvent) => {
+              // Set selected currency back to input field
+              const oSelectedItem = oEvent.getParameter("selectedItem");
+              if (oSelectedItem) {
+                oInput.setValue(oSelectedItem.getTitle());
+                oData.Currency = oSelectedItem.getTitle();
+              }
+              this._validateHeader();
+            },
+          });
+          oView.addDependent(this._currencyDialog);
+        }
+
+        this._currencyDialog.open(oInput.getValue());
+      },
+
+      onExpenseTypeCodeInputValueHelpRequest: function (oEvent) {
+        const oInput = oEvent.getSource();
+        const oView = this.getView();
+        const oModel = this._itemDialog.getModel("item");
+        const oData = oModel.getData();
+
+        if (!this._expenseTypeDialog) {
+          this._expenseTypeDialog = new SelectDialog({
+            title: "Select Expense Type",
+            items: {
+              path: "masterData>/ExpenseTypes",
+              template: new StandardListItem({
+                title: "{masterData>Code}",
+                description: "{masterData>Description}",
+              }),
+            },
+            confirm: (oEvent) => {
+              // Set selected expense type back to input field
+              const oSelectedItem = oEvent.getParameter("selectedItem");
+              if (oSelectedItem) {
+                oInput.setValue(oSelectedItem.getTitle());
+                oData.ExpenseType_Code = oSelectedItem.getTitle();
+              }
+              this._validateItem();
+            },
+          });
+          oView.addDependent(this._expenseTypeDialog);
+        }
+
+        this._expenseTypeDialog.open(oInput.getValue());
       },
 
       /* ===========================
-       DATE FORMATTING UTILITIES
+       FORMATTERS
        =========================== */
-      formatDateToYYYYMMDD: function (oDate) {
-        // Convert JS Date to yyyy-MM-dd string
-        const year = oDate.getFullYear();
-        const month = String(oDate.getMonth() + 1).padStart(2, "0");
-        const day = String(oDate.getDate()).padStart(2, "0");
-        return year + "-" + month + "-" + day;
-      },
-
       formatDate: function (sValue) {
         // Convert yyyy-MM-dd string to dd/MM/yyyy
         if (!sValue) {
@@ -99,24 +246,107 @@ sap.ui.define(
       },
 
       /* ===========================
-       INPUT & VALIDATION HANDLING
+       PRIVATE METHODS
        =========================== */
-      onFillInputItem: function (oEvent, oModel) {
-        // Update model property from input value
-        const oInput = oEvent.getSource();
-        const sValue = oEvent.getParameter("value");
-        const sPath = oInput.getBinding("value").getPath();
-
-        if (
-          sPath !== "/ExpenseType_Code" &&
-          sPath !== "/ExpenseDate" &&
-          sPath !== "/Currency"
-        ) {
-          oModel.setProperty(sPath, sValue);
+      _loadItemDialog: function () {
+        // Lazy-load item dialog fragment
+        if (!this._itemDialog) {
+          this._itemDialog = sap.ui.xmlfragment(
+            "expenseapproval.view.fragments.ItemDialog",
+            this
+          );
+          this.getView().addDependent(this._itemDialog);
         }
       },
 
-      validateItem: function () {
+      _buildPayload: function () {
+        const oPayload = {
+          Currency_code: "",
+          Notes: "",
+          ExpenseItems: [],
+        };
+
+        const oHeaderModel = this.getView().getModel("header");
+        const oHeader = oHeaderModel.getData();
+
+        const oItemsModel = this.getView().getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+
+        oPayload.Currency_code = oHeader.Currency;
+        oPayload.Notes = oHeader.ExpenseNotes;
+        aItems.forEach((oItem) => {
+          oPayload.ExpenseItems.push({
+            ExpenseType_Code: oItem.ExpenseType_Code,
+            ExpenseDate: oItem.ExpenseDate,
+            Amount: oItem.Amount,
+            Description: oItem.Description,
+          });
+        });
+
+        return oPayload;
+      },
+
+      _draft: async function () {
+        const oModel = this.getView().getModel();
+        const oPayload = this._buildPayload();
+        /** @type {Object<any>} */
+        const oPayloadData = JSON.parse(JSON.stringify(oPayload));
+
+        const oListBinding = oModel.bindList("/ExpenseRequests");
+        const oContext = oListBinding.create(oPayloadData);
+
+        try {
+          await oContext.created();
+          const oResponse = oContext.getObject();
+          return oResponse.ID;
+        } catch (oError) {
+          MessageBox.error("Error submitting request: " + oError.message);
+          throw oError;
+        }
+      },
+
+      _submit: async function (sID) {
+        const oModel = this.getOwnerComponent().getModel();
+
+        // Bind to the Action Context
+        const oActionOContext = oModel.bindContext(
+          `/ExpenseRequests(ID=${sID},IsActiveEntity=false)/ExpenseService.draftActivate(...)`
+        );
+
+        try {
+          // Execute the action
+          await oActionOContext.execute();
+          MessageBox.success("Expense request submitted successfully!", {
+            onClose: () => {
+              // Clear form data
+              this._clearForm();
+              // Navigate back to home or refresh
+              this.onPageCreateExpenseNavButtonPress();
+            },
+          });
+        } catch (error) {
+          MessageBox.error("Error activating draft: " + error.message);
+        }
+      },
+
+      _clearForm: function () {
+        // Reset Header
+        const oHeaderModel = this.getView().getModel("header");
+        oHeaderModel.setData({
+          Currency: "IDR",
+          ExpenseNotes: "",
+          _isValid: false,
+          _isValidItem: false,
+        });
+        oHeaderModel.refresh();
+
+        // Reset Items
+        const oItemsModel = this.getView().getModel("items");
+        oItemsModel.setData({ items: [] });
+        oItemsModel.refresh();
+      },
+
+      _validateItem: function () {
         // Validate item fields and set value states
         const oModel = this._itemDialog.getModel("item");
         const oData = oModel.getData();
@@ -147,14 +377,7 @@ sap.ui.define(
         oModel.refresh(true);
       },
 
-      onValidateItem: function (oEvent) {
-        // Combined input fill + validation
-        const oModel = this._itemDialog.getModel("item");
-        this.onFillInputItem(oEvent, oModel);
-        this.validateItem();
-      },
-
-      validateHeader: function () {
+      _validateHeader: function () {
         const oModel = this.getView().getModel("header");
         const oData = oModel.getData();
         let bValid = true;
@@ -182,105 +405,22 @@ sap.ui.define(
         oModel.refresh(true);
       },
 
-      onValidateHeader: function (oEvent) {
-        const oModel = this.getView().getModel("header");
-        this.onFillInputItem(oEvent, oModel);
-        this.validateHeader();
-      },
+      _onFillInputItem: function (oEvent, oModel) {
+        // Update model property from input value
+        const oInput = oEvent.getSource();
+        const sValue = oEvent.getParameter("value");
+        const sPath = oInput.getBinding("value").getPath();
 
-      buildPayload: function () {
-        const oPayload = {
-          Currency_code: "",
-          Notes: "",
-          ExpenseItems: [],
-        };
-
-        const oHeaderModel = this.getView().getModel("header");
-        const oHeader = oHeaderModel.getData();
-
-        const oItemsModel = this.getView().getModel("items");
-        const aItems = oItemsModel.getProperty("/items");
-
-        oPayload.Currency_code = oHeader.Currency;
-        oPayload.Notes = oHeader.ExpenseNotes;
-        aItems.forEach((oItem) => {
-          oPayload.ExpenseItems.push({
-            ExpenseType_Code: oItem.ExpenseType_Code,
-            ExpenseDate: oItem.ExpenseDate,
-            Amount: oItem.Amount,
-            Description: oItem.Description,
-          });
-        });
-
-        return oPayload;
-      },
-
-      draft: async function () {
-        const oModel = this.getView().getModel();
-        const oPayload = this.buildPayload();
-
-        const oListBinding = oModel.bindList("/ExpenseRequests");
-        const oContext = oListBinding.create(oPayload);
-
-        try {
-          await oContext.created();
-          const oResponse = oContext.getObject();
-          return oResponse.ID;
-        } catch (oError) {
-          MessageBox.error("Error submitting request: " + oError.message);
-          throw oError;
+        if (
+          sPath !== "/ExpenseType_Code" &&
+          sPath !== "/ExpenseDate" &&
+          sPath !== "/Currency"
+        ) {
+          oModel.setProperty(sPath, sValue);
         }
       },
 
-      onDraft: async function () {
-        const id = await this.draft();
-
-        if (id) {
-          MessageBox.success("Expense request submitted successfully!");
-        }
-      },
-
-      submit: async function (sID) {
-        const oModel = this.getOwnerComponent().getModel();
-
-        console.log(
-          `/ExpenseRequests(ID=${sID},IsActiveEntity=false)/draftActivate`
-        );
-
-        const oListBinding = oModel.bindList(
-          `/ExpenseRequests(ID=${sID},IsActiveEntity=false)/draftActivate`
-        );
-        await oListBinding.post();
-        /* const oContext = await oListBinding.create(); */
-        console.log(oListBinding);
-        /* await oContext.created();
-        const oResponse = oContext.getObject();
-        console.log(oResponse); */
-
-        /* const oAction = oModel.bindContext(
-          `/ExpenseRequests(ID=${sID},IsActiveEntity=false)/draftActivate`,
-          null,
-          {
-            $$groupId: "$direct", // 🔑 THIS IS THE FIX
-          }
-        );
-
-        await oAction.execute();
-
-        await oModel.refresh(); */
-
-        MessageBox.success("Draft activated");
-      },
-
-      onSubmit: async function () {
-        const id = await this.draft();
-
-        if (id) {
-          await this.submit(id);
-        }
-      },
-
-      getIndexItems: function (oEvent) {
+      _getIndexItems: function (oEvent) {
         const oSource = oEvent.getSource();
         const oContext = oSource.getBindingContext("items");
         const sPath = oContext.getPath();
@@ -288,113 +428,12 @@ sap.ui.define(
         return iIndex;
       },
 
-      onEditItem: function (oEvent) {
-        const index = this.getIndexItems(oEvent);
-        const oItemsModel = this.getView().getModel("items");
-        const aItems = oItemsModel.getProperty("/items");
-
-        if (index >= 0 && index < aItems.length) {
-          const oDialogModel = new sap.ui.model.json.JSONModel(aItems[index]);
-          this._itemDialog.setModel(oDialogModel, "item");
-          this._itemDialog.data("mode", "edit");
-          this._itemDialog.data("index", index);
-          this._itemDialog.open();
-        }
-      },
-
-      onDeleteItem: function (oEvent) {
-        const index = this.getIndexItems(oEvent);
-        const oItemsModel = this.getView().getModel("items");
-        const aItems = oItemsModel.getProperty("/items");
-
-        if (index >= 0 && index < aItems.length) {
-          aItems.splice(index, 1); // remove 1 element at position iIndex
-          oItemsModel.setProperty("/items", aItems); // update model
-        }
-      },
-
-      /* ===========================
-       CURRENCY VALUE HELP DIALOG
-       =========================== */
-      onCurrencyValueHelp: function (oEvent) {
-        const oInput = oEvent.getSource();
-        const oView = this.getView();
-        const oModel = this.getView.getModel("header");
-        const oData = oModel.getData();
-
-        if (!this._currencyDialog) {
-          this._currencyDialog = new sap.m.SelectDialog({
-            title: "Select Currency",
-            items: {
-              path: "/Currencies",
-              template: new sap.m.StandardListItem({
-                title: "{code}",
-                description: "{name}",
-              }),
-            },
-            confirm: function (oEvent) {
-              // Set selected currency back to input field
-              const oSelectedItem = oEvent.getParameter("selectedItem");
-              if (oSelectedItem) {
-                oInput.setValue(oSelectedItem.getTitle());
-                oData.Currency = oSelectedItem.getTitle();
-              }
-              this.validateHeader();
-            },
-          });
-          oView.addDependent(this._currencyDialog);
-        }
-
-        this._currencyDialog.open();
-      },
-
-      /* ===========================
-       EXPENSE TYPE VALUE HELP DIALOG
-       =========================== */
-      onExpenseTypeValueHelp: function (oEvent) {
-        const oInput = oEvent.getSource();
-        const oView = this.getView();
-        const oModel = this._itemDialog.getModel("item");
-        const oData = oModel.getData();
-
-        if (!this._expenseTypeDialog) {
-          this._expenseTypeDialog = new sap.m.SelectDialog({
-            title: "Select Expense Type",
-            items: {
-              path: "masterData>/ExpenseTypes",
-              template: new sap.m.StandardListItem({
-                title: "{masterData>Code}",
-                description: "{masterData>Description}",
-              }),
-            },
-            confirm: (oEvent) => {
-              // Set selected expense type back to input field
-              const oSelectedItem = oEvent.getParameter("selectedItem");
-              if (oSelectedItem) {
-                oInput.setValue(oSelectedItem.getTitle());
-                oData.ExpenseType_Code = oSelectedItem.getTitle();
-              }
-              this.validateItem();
-            },
-          });
-          oView.addDependent(this._expenseTypeDialog);
-        }
-
-        this._expenseTypeDialog.open();
-      },
-
-      /* ===========================
-       ITEM DIALOG HANDLING
-       =========================== */
-      _loadItemDialog: function () {
-        // Lazy-load item dialog fragment
-        if (!this._itemDialog) {
-          this._itemDialog = sap.ui.xmlfragment(
-            "expenseapproval.view.fragments.ItemDialog",
-            this
-          );
-          this.getView().addDependent(this._itemDialog);
-        }
+      _formatDateToYYYYMMDD: function (oDate) {
+        // Convert JS Date to yyyy-MM-dd string
+        const year = oDate.getFullYear();
+        const month = String(oDate.getMonth() + 1).padStart(2, "0");
+        const day = String(oDate.getDate()).padStart(2, "0");
+        return year + "-" + month + "-" + day;
       },
     });
   }

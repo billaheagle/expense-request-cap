@@ -3,68 +3,68 @@
     xmlns:core="sap.ui.core"
 >
     <Dialog
-        id="itemDialog"
+        id="idItemDialog"
         title="Expense Item Details"
         class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
     >
         <content>
             <VBox
-                id="itemDialogVBox"
+                id="idItemDialogVBox"
                 class="sapUiSmallMargin"
             >
                 <Label
-                    id="itemDialogLabelType"
+                    id="idExpenseTypeIDLabel"
                     text="Expense Type ID"
                 />
                 <Input
-                    id="itemDialogInputType"
+                    id="idExpenseTypeCodeInput"
                     value="{item>/ExpenseType_Code}"
                     showValueHelp="true"
-                    valueHelpRequest=".onExpenseTypeValueHelp"
+                    valueHelpRequest=".onExpenseTypeCodeInputValueHelpRequest"
                     valueState="{item>/_ExpenseType_CodeState}"
                     valueStateText="Expense Type is required"
-                    liveChange=".onValidateItem"
+                    liveChange=".onExpenseTypeCodeInputLiveChange"
                     width="100%"
                     class="sapUiSmallMarginBottom"
                 />
 
                 <Label
-                    id="itemDialogLabelDate"
+                    id="idDateLabel"
                     text="Date"
                 />
                 <DatePicker
-                    id="itemDialogInputDate"
+                    id="idExpenseDateDatePicker"
                     value="{item>/ExpenseDate}"
                     valueFormat="yyyy-MM-dd"
                     displayFormat="dd/MM/yyyy"
                     valueState="{item>/_ExpenseDateState}"
                     valueStateText="ExpenseDate is required"
-                    change=".onValidateItem"
+                    change=".onExpenseDateDatePickerChange"
                     width="100%"
                     class="sapUiSmallMarginBottom"
                 />
 
                 <Label
-                    id="itemDialogLabelAmount"
+                    id="idAmountLabel"
                     text="Amount"
                 />
                 <Input
-                    id="itemDialogInputAmount"
+                    id="idAmountInput"
                     value="{item>/Amount}"
                     valueState="{item>/_AmountState}"
                     valueStateText="Amount is required"
-                    liveChange=".onValidateItem"
+                    liveChange=".onAmountInputLiveChange"
                     width="100%"
                     class="sapUiSmallMarginBottom"
                     type="Number"
                 />
 
                 <Label
-                    id="itemDialogLabelDescription"
+                    id="idDescriptionLabel"
                     text="Description"
                 />
                 <TextArea
-                    id="itemDialogInputDescription"
+                    id="idDescriptionTextArea"
                     placeholder="Enter expense details here..."
                     value="{item>/Description}"
                     rows="4"
@@ -76,20 +76,20 @@
                 />
 
                 <HBox
-                    id="itemDialogHBoxButtons"
+                    id="idItemDialogHBox"
                     justifyContent="End"
                     class="sapUiSmallMarginTop"
                 >
                     <Button
-                        id="itemDialogBtnCancel"
+                        id="idCancelItemDialogButton"
                         text="Cancel"
-                        press=".onCloseItemDialog"
+                        press=".onCancelButtonItemDialogPress"
                         type="Reject"
                     />
                     <Button
-                        id="itemDialogBtnSave"
+                        id="idSaveItemDialogButton"
                         text="Save"
-                        press=".onSaveItemDialog"
+                        press=".onSaveButtonItemDialogPress"
                         class="sapUiSmallMarginBegin"
                         type="Accept"
                         enabled="{= ${item>/_isValid} === true }"

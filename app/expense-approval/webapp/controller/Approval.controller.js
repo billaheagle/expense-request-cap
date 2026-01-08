@@ -1,10 +1,10 @@
 sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
   "use strict";
 
-  return Controller.extend("expense.ui.controller.Approval", {
-    onInit() {},
+  return Controller.extend("expenseapproval.controller.Approval", {
+    onInit() { },
 
-    onNavBack() {
+    onPageApprovalExpenseNavButtonPress() {
       this.getOwnerComponent().getRouter().navTo("home");
     },
   });

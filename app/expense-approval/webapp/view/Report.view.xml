@@ -1,25 +1,19 @@
 <mvc:View
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core"
     xmlns="sap.m"
     controllerName="expenseapproval.controller.Report"
 >
     <Page
-        id="_IDGenPage1"
+        id="idReportPage"
         title="My Expense Requests"
         showNavButton="true"
-        navButtonPress=".onNavBack"
+        navButtonPress=".onPageReportExpenseNavButtonPress"
     >
-        <headerContent>
-            <Button
-                id="_IDGenButton"
-                text="Create Expense"
-                press=".onCreatePress"
-            />
-        </headerContent>
-
         <content>
-            <!-- your table here -->
+            <Text
+                id="idReportExpenseGoesHereText"
+                text="Report Expense goes here"
+            />
         </content>
     </Page>
 </mvc:View>

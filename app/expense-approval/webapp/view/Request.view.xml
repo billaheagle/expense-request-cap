@@ -1,58 +1,56 @@
 <mvc:View
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form"
     xmlns="sap.m"
     controllerName="expenseapproval.controller.Request"
 >
-    <Shell id="_IDGenShell">
+    <Shell id="idRequestShell">
         <Page
-            id="_IDGenPage"
+            id="idCreateExpensePage"
             title="Create Expense"
             showNavButton="true"
-            navButtonPress=".onNavBack"
+            navButtonPress=".onPageCreateExpenseNavButtonPress"
         >
             <content>
                 <Panel
-                    id="_IDGenPanel1"
+                    id="idExpenseRequestPanel"
                     headerText="Expense Request"
                     class="sapUiResponsiveMargin"
                     width="auto"
                     expanded="true"
                 >
                     <form:SimpleForm
-                        id="expenseForm"
-                        layout="ResponsiveGridLayout"
+                        id="idExpenseSimpleForm"
                         editable="true"
                     >
                         <form:content>
                             <Label
-                                id="_IDGenLabel2"
+                                id="idCurrencyLabel"
                                 text="Currency"
                             />
                             <Input
-                                id="_IDGenInput"
+                                id="idCurrencyInput"
                                 value="{header>/Currency}"
                                 placeholder="e.g., USD"
                                 width="15%"
                                 valueState="{header>/_CurrencyState}"
                                 valueStateText="Currency is required"
-                                liveChange=".onValidateHeader"
+                                liveChange=".onCurrencyInputLiveChange"
                                 showValueHelp="true"
-                                valueHelpRequest=".onCurrencyValueHelp"
+                                valueHelpRequest=".onCurrencyInputValueHelpRequest"
                             />
 
                             <Label
-                                id="_IDGenLabel"
+                                id="idExpenseNotesLabel"
                                 text="Expense Notes"
                             />
                             <TextArea
-                                id="expenseNotes"
+                                id="idExpenseNotesTextArea"
                                 placeholder="Enter expense details here..."
                                 value="{header>/ExpenseNotes}"
                                 valueState="{header>/_ExpenseNotesState}"
                                 valueStateText="Expense Notes is required"
-                                liveChange=".onValidateHeader"
+                                liveChange=".onExpenseNotesTextAreaLiveChange"
                                 rows="4"
                                 width="50%"
                                 growing="true"
@@ -64,22 +62,21 @@
                     </form:SimpleForm>
 
                     <HBox
-                        id="_IDGenHBox6"
+                        id="idActionButtonsHBox"
                         justifyContent="End"
                         class="sapUiSmallMarginTop"
                     >
                         <Button
-                            id="_IDGenButton4"
+                            id="idSaveAsDraftButton"
                             text="Save as Draft"
-                            press=".onDraft"
+                            press=".onSaveAsDraftButtonPress"
                             icon="sap-icon://save"
-                            type="Default"
                             enabled="{= ${header>/_isValid} === true }"
                         />
                         <Button
-                            id="_IDGenButton5"
+                            id="idSubmitRequestButton"
                             text="Submit Request"
-                            press=".onSubmit"
+                            press=".onSubmitRequestButtonPress"
                             class="sapUiSmallMarginBegin"
                             icon="sap-icon://action"
                             type="Emphasized"
@@ -89,104 +86,103 @@
                 </Panel>
 
                 <Panel
-                    id="_IDGenPanel2"
+                    id="idExpenseItemsPanel"
                     headerText="Expense Items"
                     class="sapUiResponsiveMargin"
                     width="auto"
                     expanded="true"
                 >
                     <Table
-                        id="itemsTable"
+                        id="idItemsTable"
                         items="{items>/items}"
                         mode="MultiSelect"
-                        inset="false"
                     >
                         <headerToolbar>
-                            <Toolbar id="_IDGenToolbar1">
-                                <ToolbarSpacer id="_IDGenToolbarSpacer" />
+                            <Toolbar id="idItemsToolbar">
+                                <ToolbarSpacer id="idItemsToolbarSpacer" />
                                 <Button
-                                    id="_IDGenButton1"
+                                    id="idAddNewItemButton"
                                     text="Add New Item"
                                     icon="sap-icon://add"
-                                    press=".onAddItem"
+                                    press=".onAddNewItemButtonPress"
                                     type="Ghost"
                                 />
                             </Toolbar>
                         </headerToolbar>
 
                         <columns>
-                            <Column id="_IDGenColumn">
+                            <Column id="idTypeColumn">
                                 <Text
-                                    id="_IDGenText3"
+                                    id="idTypeColumnHeaderText"
                                     text="Type"
                                 />
                             </Column>
-                            <Column id="_IDGenColumn1">
+                            <Column id="idDateColumn">
                                 <Text
-                                    id="_IDGenText4"
+                                    id="idDateColumnHeaderText"
                                     text="Date"
                                 />
                             </Column>
-                            <Column id="_IDGenColumn2">
+                            <Column id="idAmountColumn">
                                 <Text
-                                    id="_IDGenText5"
+                                    id="idAmountColumnHeaderText"
                                     text="Amount"
                                 />
                             </Column>
-                            <Column id="_IDGenColumn3">
+                            <Column id="idDescriptionColumn">
                                 <Text
-                                    id="_IDGenText6"
+                                    id="idDescriptionColumnHeaderText"
                                     text="Description"
                                 />
                             </Column>
                             <Column
-                                id="_IDGenColumn4"
+                                id="idActionColumn"
                                 hAlign="Center"
                             >
                                 <Text
-                                    id="_IDGenText12"
+                                    id="idActionColumnHeaderText"
                                     text="Action"
                                 />
                             </Column>
                         </columns>
 
                         <items>
-                            <ColumnListItem id="_IDGenColumnListItem">
+                            <ColumnListItem id="idItemsColumnListItem">
                                 <cells>
                                     <Text
-                                        id="_IDGenText8"
+                                        id="idExpenseTypeCodeText"
                                         text="{items>ExpenseType_Code}"
                                     />
                                     <Text
-                                        id="_IDGenText9"
+                                        id="idExpenseDateText"
                                         text="{path: 'items>ExpenseDate', formatter: '.formatDate'}"
                                     />
                                     <Text
-                                        id="_IDGenText10"
+                                        id="idAmountText"
                                         text="{items>Amount}"
                                     />
                                     <Text
-                                        id="_IDGenText11"
+                                        id="idDescriptionText"
                                         text="{items>Description}"
                                     />
 
                                     <HBox
-                                        id="_IDGenHBox"
+                                        id="idItemActionsHBox"
                                         justifyContent="Center"
                                         alignItems="Center"
                                         class="sapUiTinyMargin"
                                     >
                                         <Button
-                                            id="_IDGenButton2"
+                                            id="idEditItemButton"
                                             type="Attention"
                                             icon="sap-icon://edit"
-                                            press=".onEditItem"
+                                            press=".onButtonEditItemPress"
                                         />
                                         <Button
-                                            id="_IDGenButton3"
+                                            id="idDeleteItemButton"
                                             type="Reject"
                                             icon="sap-icon://delete"
-                                            press=".onDeleteItem"
+                                            press=".onButtonDeleteItemPress"
                                             class="sapUiTinyMarginBegin"
                                         />
                                     </HBox>

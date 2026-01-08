@@ -5,27 +5,26 @@
     displayBlock="true"
 >
     <Page
-        id="_IDGenPage3"
+        id="idExpenseApprovalPage"
         title="{i18n>title}"
     >
-        <Panel id="_IDGenPanel">
+        <Panel id="idExpenseApprovalPanel">
             <content>
                 <FlexBox
-                    id="tileFlexBox"
+                    id="idTileFlexBox"
                     wrap="Wrap"
-                    justifyContent="Start"
                     alignItems="Start"
                 >
                     <GenericTile
-                        id="_IDGenGenericTile"
+                        id="idRequestGenericTile"
                         header="Request Expense"
-                        press=".onRequestPage"
+                        press=".onGenericTileRequestPress"
                     >
                         <tileContent>
-                            <TileContent id="_IDGenTileContent1">
+                            <TileContent id="idRequestTileContent">
                                 <content>
                                     <Text
-                                        id="_IDGenText"
+                                        id="idRequestANewExpenseText"
                                         text="Request a new expense"
                                     />
                                 </content>
@@ -34,16 +33,16 @@
                     </GenericTile>
 
                     <GenericTile
-                        id="_IDGenGenericTile1"
+                        id="idReportGenericTile"
                         header="Report Expenses"
-                        press=".onReportPage"
+                        press=".onGenericTileReportPress"
                         class="sapUiSmallMarginBegin"
                     >
                         <tileContent>
-                            <TileContent id="_IDGenTileContent2">
+                            <TileContent id="idReportTileContent">
                                 <content>
                                     <Text
-                                        id="_IDGenText1"
+                                        id="idViewYourExpensesText"
                                         text="View your expenses"
                                     />
                                 </content>
@@ -52,16 +51,16 @@
                     </GenericTile>
 
                     <GenericTile
-                        id="_IDGenGenericTile2"
+                        id="idApprovalGenericTile"
                         header="Approval"
-                        press=".onApprovalPage"
+                        press=".onGenericTileApprovalPress"
                         class="sapUiSmallMarginBegin"
                     >
                         <tileContent>
-                            <TileContent id="_IDGenTileContent3">
+                            <TileContent id="idApprovalTileContent">
                                 <content>
                                     <Text
-                                        id="_IDGenText2"
+                                        id="idViewYourApprovalsText"
                                         text="View your approvals"
                                     />
                                 </content>
