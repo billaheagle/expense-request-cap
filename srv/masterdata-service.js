@@ -1,135 +1,56 @@
-const cds = require("@sap/cds");
+const cds = require('@sap/cds');
 
-module.exports = cds.service.impl(async function () {
-  const { Employees, ExpenseTypes } = this.entities;
+module.exports = class MasterDataService extends cds.ApplicationService {
+  async init() {
+    const { Employees, ExpenseTypes } = this.entities;
+    const { ExpenseRequests, ExpenseItems } = cds.entities('my.expense');
 
-  /**
-   * LOG REQUEST USER DETAILS
-   */
+    async function assertUnique(req, sField) {
+      const value = req.data[sField];
+      if (!value) return;
 
-  this.before("*", (req) => {
-    /* if (!req.user.is("admin")) {
-      req.reject(403, "Access denied: Admin role required");
-    } */
-  });
-
-  /**
-   * ======================================================
-   * EMPLOYEES VALIDATIONS
-   * ======================================================
-   */
-
-  /**
-   * BEFORE CREATE / UPDATE Employees
-   * - Validate mandatory business rules
-   * - Enforce email uniqueness
-   */
-  this.before(["CREATE", "UPDATE"], Employees, async (req) => {
-    const { Email, EmployeeNumber } = req.data;
-
-    if (Email) {
-      const existingEmployee = await cds
-        .tx(req)
-        .run(SELECT.one(Employees).from(Employees).where({ Email }));
-
-      if (existingEmployee && existingEmployee.ID !== req.data.ID) {
-        req.reject(400, `Employee with email '${Email}' already exists`);
-      }
+      const oEmployee = await SELECT.one.from(Employees).where({ [sField]: value });
+      if (oEmployee && oEmployee.ID !== req.data.ID) req.reject(409, `Employee with ${sField} '${value}' already exists`);
     }
 
-    if (EmployeeNumber) {
-      const existingEmployee = await cds
-        .tx(req)
-        .run(SELECT.one(Employees).from(Employees).where({ EmployeeNumber }));
+    this.before(['CREATE', 'UPDATE'], Employees, async (req) => {
+      await assertUnique(req, 'Email');
+      await assertUnique(req, 'EmployeeNumber');
+    });
 
-      if (existingEmployee && existingEmployee.ID !== req.data.ID) {
-        req.reject(
-          400,
-          `Employee with employee number '${EmployeeNumber}' already exists`
-        );
-      }
-    }
-  });
+    this.before('DELETE', Employees, async (req) => {
+      const oEmployee = await SELECT.one.from(req.subject);
+      if (!oEmployee) req.reject(404, "Employee not found");
+      if (oEmployee.Active) req.reject(409, "Active employee cannot be deleted");
 
-  /**
-   * BEFORE DELETE Employees
-   * - Active employees cannot be deleted
-   * - Employees who are managers cannot be deleted
-   */
-  this.before("DELETE", Employees, async (req) => {
-    const { ID } = req.data;
+      const oSubordinate = await SELECT.one.from(Employees).where({ Manager_ID: oEmployee.ID });
+      if (oSubordinate) req.reject(409, "Employee is still a manager of other employees");
 
-    // Check if employee is active
-    const employee = await cds
-      .tx(req)
-      .run(SELECT.one(Employees).from(Employees).where({ ID }));
+      const oExpenseRequest = await SELECT.one.from(ExpenseRequests).where({ Employee_ID: oEmployee.ID });
+      if (oExpenseRequest) req.reject(409, "Employee still have an Expense Request");
+    });
 
-    if (!employee) {
-      req.reject(404, `Employee not found`);
-    }
+    this.before(['CREATE', 'UPDATE'], ExpenseTypes, async (req) => {
+      const oCurrent = req.event === 'UPDATE' ? await SELECT.one.from(req.subject) : {};
+      if (!oCurrent) req.reject(404, "Expense type not found"); 
+      if (oCurrent.Active === false && req.data.Active !== true) req.reject(409, "Inactive expense types cannot be modified. Reactivate it first.");
 
-    if (employee.IsActive) {
-      req.reject(400, `Active employees cannot be deleted`);
-    }
+      const oMerged = { ...oCurrent, ...req.data };
+      const bHasMaxAmount = oMerged.MaxAmount !== null && oMerged.MaxAmount !== undefined;
 
-    const hasReports = await cds
-      .tx(req)
-      .run(SELECT.one(Employees).from(Employees).where({ Manager_ID: ID }));
+      if (oMerged.ReceiptRequired === false && !bHasMaxAmount) req.reject(400, "MaxAmount is required when no receipt is required");
+      if (bHasMaxAmount && Number(oMerged.MaxAmount) <= 0) req.reject(400, "MaxAmount must be greater than 0");
+    });
 
-    if (hasReports) {
-      req.reject(400, `Employee is a manager and cannot be deleted`);
-    }
-  });
+    this.before('DELETE', ExpenseTypes, async (req) => {
+      const oExpenseType = await SELECT.one.from(req.subject);
+      if (!oExpenseType) req.reject(404, "Expense Type not found");
+      if (oExpenseType.Active) req.reject(409, "Active expense type cannot be deleted");
 
-  /**
-   * ======================================================
-   * EXPENSE TYPES VALIDATIONS
-   * ======================================================
-   */
+      const oExpenseItem = await SELECT.one.from(ExpenseItems).where({ 'ExpenseType_Code': oExpenseType.Code });
+      if (oExpenseItem) req.reject(409, "Expense Type still used in Expense Items");
+    });
 
-  /**
-   * BEFORE CREATE / UPDATE ExpenseTypes
-   * - Validate policy consistency
-   */
-  this.before(["CREATE", "UPDATE"], ExpenseTypes, async (req) => {
-    const { ReceiptRequired, MaxAmount, Active } = req.data;
-
-    // If receipt is NOT required, max amount must be defined
-    if (
-      ReceiptRequired === false &&
-      (MaxAmount === null || MaxAmount === undefined)
-    ) {
-      req.reject(400, `MaxAmount must be defined when ReceiptRequired is false`);
-    }
-
-    // Max amount must be positive if defined
-    if (MaxAmount !== null && MaxAmount !== undefined && MaxAmount <= 0) {
-      req.reject(400, `MaxAmount must be a positive value`);
-    }
-
-    // Inactive types should not be modifable
-    if (Active === false && req.method === "UPDATE") {
-      req.reject(400, `Inactive expense types cannot be modified`);
-    }
-  });
-
-  /**
-   * BEFORE DELETE ExpenseTypes
-   * - Prevent deletion of active types
-   */
-  this.before("DELETE", ExpenseTypes, async (req) => {
-    const { ID } = req.data;
-
-    const expenseType = await cds
-      .tx(req)
-      .run(SELECT.one(ExpenseTypes).from(ExpenseTypes).where({ ID }));
-
-    if (!expenseType) {
-      req.reject(404, `Expense type not found`);
-    }
-
-    if (expenseType.Active) {
-      req.reject(400, `Active expense types cannot be deleted`);
-    }
-  });
-});
+    return super.init();
+  }
+};
