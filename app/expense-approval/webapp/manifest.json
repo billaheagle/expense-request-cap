@@ -77,10 +77,7 @@
         "settings": {
           "operationMode": "Server",
           "autoExpandSelect": true,
-          "earlyRequests": true,
-          "httpHeaders": {
-            "Authorization": "Basic ZW1wbG95ZWVAY29tcGFueS5jb206MTIzNDU2"
-          }
+          "earlyRequests": true
         }
       },
       "masterData": {

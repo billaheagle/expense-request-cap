@@ -1,22 +1,32 @@
 using {my.expense as db} from '../db/schema';
 
+@requires: 'authenticated-user'
 service ExpenseService {
     @odata.draft.enabled
     entity ExpenseRequests as projection on db.ExpenseRequests
         actions {
-            // @requires: 'Manager'
+            action submit()                 returns {
+                @mandatory Status : String;
+            };
+
             action approve()                returns {
                 @mandatory Status : String;
             };
 
-            // @requires: 'Manager'
             action reject(Comments: String) returns {
                 @mandatory Status : String;
             };
 
-            // @requires: 'Finance'
             action reimburse()              returns {
                 @mandatory Status : String;
             };
+        };
+
+    @readonly
+    entity Employees       as
+        projection on db.Employees {
+            ID,
+            FirstName,
+            LastName
         };
 }

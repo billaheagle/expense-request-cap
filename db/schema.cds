@@ -49,11 +49,11 @@ entity ExpenseTypes : managed {
 
 @odata.draft.enabled
 entity ExpenseRequests : cuid, managed {
-    RequestNumber    : String(15) not null;
+    RequestNumber    : String(15);
     Notes            : String(255) not null;
     Employee         : Association to Employees not null;
     Status           : Status default #Draft not null;
-    SubmissionDate   : DateTime not null;
+    SubmissionDate   : DateTime;
     ApprovalDate     : DateTime;
     Approver         : Association to Employees;
     TotalAmount      : Decimal(15, 2) not null;

@@ -1,8 +1,8 @@
-const cds = require('@sap/cds')
+const cds = require('@sap/cds');
 
 module.exports = class ExpenseService extends cds.ApplicationService {
   async init() {
-    const { ExpenseRequests, ExpenseApprovals } = this.entities
+    const { ExpenseRequests, ExpenseApprovals, ExpenseItems } = this.entities
     const { Employees } = cds.entities('my.expense')
 
     async function getCurrentEmployee(req) {
@@ -24,9 +24,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
     this.before('CREATE', ExpenseRequests.drafts, async (req) => {
       if (!req.user.is("employee")) req.reject(403, 'Only employees can create expense requests');
-      const employee = await getCurrentEmployee(req);
-      req.data.Employee_ID = employee.ID;
-      req.data.TotalAmount = sumItems(req.data.ExpenseItems);
     })
 
     async function getNextRequestNumber() {
@@ -49,18 +46,58 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const employee = await getCurrentEmployee(req);
       req.data.Employee_ID = employee.ID;
 
-      if (!Array.isArray(req.data.ExpenseItems) || req.data.ExpenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
       req.data.TotalAmount = sumItems(req.data.ExpenseItems);
-      req.data.RequestNumber = await getNextRequestNumber();
-      req.data.SubmissionDate = new Date();
-      req.data.Status = 'Submitted';
+      req.data.Status = 'Draft';
+    });
+
+    this.before('UPDATE', ExpenseRequests, async (req) => {
+      if (!req.user.is("employee")) req.reject(403, 'Only employees can be save expense requests');
+
+      const expenseRequest = await SELECT.one.from(req.subject)
+      if (!expenseRequest) req.reject(404, 'Request not found');
+
+      if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be save`);
+
+      const employee = await getCurrentEmployee(req);
+      req.data.Employee_ID = employee.ID;
+
+      if (expenseRequest.Employee_ID !== req.data.Employee_ID) req.reject(403, `Only owner can Edit`);
+
+      req.data.TotalAmount = sumItems(req.data.ExpenseItems);
+      req.data.Status = 'Draft';
+    });
+
+    this.on('submit', ExpenseRequests, async (req) => {
+      if (!req.user.is("employee")) req.reject(403, 'Only employee can run this process');
+      const ID = req.params[0].ID;
+
+      const expenseRequest = await SELECT.one.from(req.subject)
+      if (!expenseRequest) req.reject(404, 'Request not found');
+
+
+      if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be submitted`);
+
+      const employee = await getCurrentEmployee(req);
+
+      if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Submit`);
+
+      const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: expenseRequest.ID });
+      if (expenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
+      const totalAmount = sumItems(expenseItems);
+      const requestNumber = await getNextRequestNumber();
+
+      await UPDATE(ExpenseRequests)
+        .set({ Status: 'Submitted', SubmissionDate: new Date(), TotalAmount: totalAmount, RequestNumber: requestNumber })
+        .where({ ID });
+
+      return { Status: 'Submitted' };
     });
 
     async function decide(req, decision) {
       if (!req.user.is("manager")) req.reject(403, 'Only manager can decide this requests');
       const ID = req.params[0].ID;
 
-      const expenseRequest = await SELECT.one.from(ExpenseRequests).where({ ID });
+      const expenseRequest = await SELECT.one.from(req.subject)
       if (!expenseRequest) req.reject(404, 'Request not found');
 
       if (expenseRequest.Status !== 'Submitted') req.reject(409, `Only submitted requests can be ${decision.toLowerCase()}`);
@@ -89,7 +126,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (!req.user.is("finance")) req.reject(403, 'Only finance can run this process');
       const ID = req.params[0].ID;
 
-      const expenseRequest = await SELECT.one.from(ExpenseRequests).where({ ID });
+      const expenseRequest = await SELECT.one.from(req.subject)
       if (!expenseRequest) req.reject(404, 'Request not found');
 
       if (expenseRequest.Status !== 'Approved') req.reject(409, `Only approved requests can be reimbursed`);

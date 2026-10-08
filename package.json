@@ -18,6 +18,7 @@
     "requires": {
       "auth": {
         "kind": "mocked",
+        "login_required": true,
         "users": {
           "admin@company.com": {
             "password": "123456",
@@ -49,8 +50,7 @@
               "*"
             ]
           }
-        },
-        "default": "manager@company.com"
+        }
       }
     }
   },
