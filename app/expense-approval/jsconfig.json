@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "es2022",
+        "target": "es2022",
+        "checkJs": false,
+        "types": [
+            "@sapui5/types"
+        ]
+    },
+    "include": [
+        "webapp/**/*.js"
+    ]
+}

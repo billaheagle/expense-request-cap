@@ -51,17 +51,17 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     });
 
     this.before('UPDATE', ExpenseRequests, async (req) => {
-      if (!req.user.is("employee")) req.reject(403, 'Only employees can be save expense requests');
+      if (!req.user.is("employee")) req.reject(403, 'Only employees can edit expense requests');
 
       const expenseRequest = await SELECT.one.from(req.subject)
       if (!expenseRequest) req.reject(404, 'Request not found');
 
-      if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be save`);
+      if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be edited`);
 
       const employee = await getCurrentEmployee(req);
-      req.data.Employee_ID = employee.ID;
 
-      if (expenseRequest.Employee_ID !== req.data.Employee_ID) req.reject(403, `Only owner can Edit`);
+      if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Edit`);
+      req.data.Employee_ID = employee.ID;
 
       req.data.TotalAmount = sumItems(req.data.ExpenseItems);
       req.data.Status = 'Draft';

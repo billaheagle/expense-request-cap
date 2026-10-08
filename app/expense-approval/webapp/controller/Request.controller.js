@@ -1,440 +1,363 @@
-sap.ui.define(
-  [
-    "sap/ui/core/mvc/Controller",
-    "sap/m/MessageBox",
-    "sap/ui/model/json/JSONModel",
-    "sap/ui/model/BindingMode",
-    "sap/m/SelectDialog",
-    "sap/m/StandardListItem",
-  ],
-  function (Controller, MessageBox, JSONModel, BindingMode, SelectDialog, StandardListItem) {
+/** @typedef {import("sap/ui/model/json/JSONModel").default} JSONModelType */
+
+sap.ui.define([
+  "sap/ui/core/mvc/Controller",
+  "sap/ui/model/json/JSONModel",
+  "sap/ui/model/BindingMode",
+  "sap/m/MessageBox",
+  "sap/ui/core/UIComponent",
+  "sap/m/SelectDialog",
+  "sap/m/StandardListItem"
+],
+  /**
+   * @param   {typeof import("sap/ui/core/mvc/Controller").default} Controller
+   * @param   {typeof import("sap/ui/model/json/JSONModel").default} JSONModel
+   * @param   {typeof import("sap/ui/model/BindingMode").default} BindingMode
+   * @param   {typeof import("sap/m/MessageBox").default} MessageBox
+   * @param   {typeof import("sap/ui/core/UIComponent").default} UIComponent
+   * @param   {typeof import("sap/m/SelectDialog").default} SelectDialog
+   * @param   {typeof import("sap/m/StandardListItem").default} StandardListItem
+   */
+  function (Controller, JSONModel, BindingMode, MessageBox, UIComponent, SelectDialog, StandardListItem) {
     "use strict";
 
     return Controller.extend("expenseapproval.controller.Request", {
-      /* ===========================
-       LIFECYCLE METHODS
-       =========================== */
-      onInit() {
-        const oHeader = {
+      _getInitialHeader() {
+        return {
           Currency: "IDR",
           ExpenseNotes: "",
-        };
+        }
+      },
 
-        // Create Header model with TwoWay binding
+      _getInitialItems() {
+        return {
+          items: []
+        }
+      },
+
+      _getInitialItem() {
+        const oToday = new Date();
+        const sYear = oToday.getFullYear();
+        const sMonth = String(oToday.getMonth() + 1).padStart(2, "0");
+        const sDay = String(oToday.getDate()).padStart(2, "0");
+
+        return {
+          ExpenseType_Code: "",
+          ExpenseDate: `${sYear}-${sMonth}-${sDay}`,
+          Amount: 0,
+          Description: "",
+        }
+      },
+
+      onInit() {
+        const oHeader = this._getInitialHeader();
         const oHeaderModel = new JSONModel(oHeader);
         oHeaderModel.setDefaultBindingMode(BindingMode.TwoWay);
         this.getView().setModel(oHeaderModel, "header");
 
-        // Create items model with TwoWay binding
-        const oItemsModel = new JSONModel({ items: [] });
+        const oItems = this._getInitialItems();
+        const oItemsModel = new JSONModel(oItems);
         oItemsModel.setDefaultBindingMode(BindingMode.TwoWay);
         this.getView().setModel(oItemsModel, "items");
+
+        this._validateHeader();
       },
 
-      /* ===========================
-       EVENT HANDLERS
-       =========================== */
       onPageCreateExpenseNavButtonPress() {
-        // Navigate back to home route
-        this.getOwnerComponent().getRouter().navTo("home");
+        UIComponent.getRouterFor(this).navTo("home");
       },
 
-      onAddNewItemButtonPress: function () {
-        // Open item dialog with default empty ite
-        this._loadItemDialog();
-
-        const oItem = {
-          ExpenseType_Code: "",
-          ExpenseDate: this._formatDateToYYYYMMDD(new Date()),
-          Amount: null,
-          Description: "",
-        };
-
-        const oDialogModel = new JSONModel(oItem);
-        this._itemDialog.setModel(oDialogModel, "item");
-        this._itemDialog.data("mode", "new");
-        this._itemDialog.open();
-      },
-
-      onButtonEditItemPress: function (oEvent) {
-        const index = this._getIndexItems(oEvent);
-        const oItemsModel = this.getView().getModel("items");
-        const aItems = oItemsModel.getProperty("/items");
-
-        if (index >= 0 && index < aItems.length) {
-          const oDialogModel = new JSONModel(aItems[index]);
-          this._itemDialog.setModel(oDialogModel, "item");
-          this._itemDialog.data("mode", "edit");
-          this._itemDialog.data("index", index);
-          this._itemDialog.open();
-        }
-      },
-
-      onButtonDeleteItemPress: function (oEvent) {
-        const index = this._getIndexItems(oEvent);
-        const oItemsModel = this.getView().getModel("items");
-        const aItems = oItemsModel.getProperty("/items");
-
-        if (index >= 0 && index < aItems.length) {
-          aItems.splice(index, 1); // remove 1 element at position iIndex
-          oItemsModel.setProperty("/items", aItems); // update model
-        }
-      },
-
-      onSaveButtonItemDialogPress: function () {
-        // Save item data into items model
-        const oItemData = this._itemDialog.getModel("item").getData();
-        const oItemsModel = this.getView().getModel("items");
-        const aItems = oItemsModel.getProperty("/items");
-        const mode = this._itemDialog.data("mode");
-
-        if (mode === "new") {
-          // add new
-          aItems.push({ ...oItemData });
-        } else if (mode === "edit") {
-          // update existing
-          const iIndex = this._itemDialog.data("index");
-          aItems[iIndex] = { ...oItemData };
-        }
-
-        oItemsModel.setProperty("/items", aItems);
-
-        this._itemDialog.close();
-        this._validateHeader();
-      },
-
-      onCancelButtonItemDialogPress: function () {
-        // Close item dialog if open
-        if (this._itemDialog) {
-          this._itemDialog.close();
-        }
-      },
-
-      onCurrencyInputLiveChange: function (oEvent) {
-        const oModel = this.getView().getModel("header");
-        this._onFillInputItem(oEvent, oModel);
-        this._validateHeader();
-      },
-
-      onExpenseNotesTextAreaLiveChange: function (oEvent) {
-        const oModel = this.getView().getModel("header");
-        this._onFillInputItem(oEvent, oModel);
-        this._validateHeader();
-      },
-
-      onExpenseTypeCodeInputLiveChange: function (oEvent) {
-        // Combined input fill + validation
-        const oModel = this._itemDialog.getModel("item");
-        this._onFillInputItem(oEvent, oModel);
-        this._validateItem();
-      },
-
-      onExpenseDateDatePickerChange: function (oEvent) {
-        // Combined input fill + validation
-        const oModel = this._itemDialog.getModel("item");
-        this._onFillInputItem(oEvent, oModel);
-        this._validateItem();
-      },
-
-      onAmountInputLiveChange: function (oEvent) {
-        // Combined input fill + validation
-        const oModel = this._itemDialog.getModel("item");
-        this._onFillInputItem(oEvent, oModel);
-        this._validateItem();
-      },
-
-      onSaveAsDraftButtonPress: async function () {
-        const id = await this._draft();
-
-        if (id) {
-          MessageBox.success("Expense request Saved successfully!", {
-            onClose: () => {
-              // Clear form data
-              this._clearForm();
-              // Navigate back to home or refresh
-              this.onPageCreateExpenseNavButtonPress();
-            },
-          });
-        }
-      },
-
-      onSubmitRequestButtonPress: async function () {
-        const id = await this._draft();
-
-        if (id) {
-          await this._submit(id);
-        }
-      },
-
-      onCurrencyInputValueHelpRequest: function (oEvent) {
-        const oInput = oEvent.getSource();
-        const oView = this.getView();
-        const oModel = this.getView().getModel("header");
-        const oData = oModel.getData();
-
-        if (!this._currencyDialog) {
-          this._currencyDialog = new SelectDialog({
-            title: "Select Currency",
-            items: {
-              path: "/Currencies",
-              template: new StandardListItem({
-                title: "{code}",
-                description: "{name}",
-              }),
-            },
-            confirm: (oEvent) => {
-              // Set selected currency back to input field
-              const oSelectedItem = oEvent.getParameter("selectedItem");
-              if (oSelectedItem) {
-                oInput.setValue(oSelectedItem.getTitle());
-                oData.Currency = oSelectedItem.getTitle();
-              }
-              this._validateHeader();
-            },
-          });
-          oView.addDependent(this._currencyDialog);
-        }
-
-        this._currencyDialog.open(oInput.getValue());
-      },
-
-      onExpenseTypeCodeInputValueHelpRequest: function (oEvent) {
-        const oInput = oEvent.getSource();
-        const oView = this.getView();
-        const oModel = this._itemDialog.getModel("item");
-        const oData = oModel.getData();
-
-        if (!this._expenseTypeDialog) {
-          this._expenseTypeDialog = new SelectDialog({
-            title: "Select Expense Type",
-            items: {
-              path: "masterData>/ExpenseTypes",
-              template: new StandardListItem({
-                title: "{masterData>Code}",
-                description: "{masterData>Description}",
-              }),
-            },
-            confirm: (oEvent) => {
-              // Set selected expense type back to input field
-              const oSelectedItem = oEvent.getParameter("selectedItem");
-              if (oSelectedItem) {
-                oInput.setValue(oSelectedItem.getTitle());
-                oData.ExpenseType_Code = oSelectedItem.getTitle();
-              }
-              this._validateItem();
-            },
-          });
-          oView.addDependent(this._expenseTypeDialog);
-        }
-
-        this._expenseTypeDialog.open(oInput.getValue());
-      },
-
-      /* ===========================
-       FORMATTERS
-       =========================== */
-      formatDate: function (sValue) {
-        // Convert yyyy-MM-dd string to dd/MM/yyyy
-        if (!sValue) {
-          return "";
-        }
-        const oDate = new Date(sValue);
-        const day = String(oDate.getDate()).padStart(2, "0");
-        const month = String(oDate.getMonth() + 1).padStart(2, "0");
-        const year = oDate.getFullYear();
-        return day + "/" + month + "/" + year;
-      },
-
-      /* ===========================
-       PRIVATE METHODS
-       =========================== */
-      _loadItemDialog: function () {
-        // Lazy-load item dialog fragment
-        if (!this._itemDialog) {
-          this._itemDialog = sap.ui.xmlfragment(
-            "expenseapproval.view.fragments.ItemDialog",
-            this
-          );
-          this.getView().addDependent(this._itemDialog);
-        }
-      },
-
-      _buildPayload: function () {
-        const oPayload = {
-          Currency_code: "",
-          Notes: "",
-          ExpenseItems: [],
-        };
-
+      _buildPayload() {
         const oHeaderModel = this.getView().getModel("header");
         const oHeader = oHeaderModel.getData();
 
         const oItemsModel = this.getView().getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
-        oPayload.Currency_code = oHeader.Currency;
-        oPayload.Notes = oHeader.ExpenseNotes;
-        aItems.forEach((oItem) => {
-          oPayload.ExpenseItems.push({
-            ExpenseType_Code: oItem.ExpenseType_Code,
-            ExpenseDate: oItem.ExpenseDate,
-            Amount: oItem.Amount,
-            Description: oItem.Description,
-          });
-        });
+        const oPayload = {
+          Currency_code: oHeader.Currency,
+          Notes: oHeader.ExpenseNotes,
+          ExpenseItems: []
+        }
+
+        for (const oItem of aItems) {
+          oPayload.ExpenseItems.push(
+            {
+              ExpenseType_Code: oItem.ExpenseType_Code,
+              ExpenseDate: oItem.ExpenseDate,
+              Amount: oItem.Amount,
+              Description: oItem.Description
+            }
+          )
+        }
 
         return oPayload;
       },
 
-      _draft: async function () {
+      async _draft() {
         const oModel = this.getView().getModel();
-        const oPayload = this._buildPayload();
-        /** @type {Object<any>} */
-        const oPayloadData = JSON.parse(JSON.stringify(oPayload));
-
         const oListBinding = oModel.bindList("/ExpenseRequests");
-        const oContext = oListBinding.create(oPayloadData);
+        const oPayload = this._buildPayload();
+        const oContext = oListBinding.create(oPayload);
+        await oContext.created();
 
-        try {
-          await oContext.created();
-          const oResponse = oContext.getObject();
-          return oResponse.ID;
-        } catch (oError) {
-          MessageBox.error("Error submitting request: " + oError.message);
-          throw oError;
-        }
+        return oContext.getProperty("ID");
       },
 
-      _submit: async function (sID) {
-        const oModel = this.getOwnerComponent().getModel();
-
-        // Bind to the Action Context
-        const oActionOContext = oModel.bindContext(
+      async _activate(sID) {
+        const oModel = this.getView().getModel();
+        const oAction = oModel.bindContext(
           `/ExpenseRequests(ID=${sID},IsActiveEntity=false)/ExpenseService.draftActivate(...)`
         );
-
-        try {
-          // Execute the action
-          await oActionOContext.execute();
-          MessageBox.success("Expense request submitted successfully!", {
-            onClose: () => {
-              // Clear form data
-              this._clearForm();
-              // Navigate back to home or refresh
-              this.onPageCreateExpenseNavButtonPress();
-            },
-          });
-        } catch (error) {
-          MessageBox.error("Error activating draft: " + error.message);
-        }
+        await oAction.execute();
       },
 
-      _clearForm: function () {
-        // Reset Header
+      async _submit(sID) {
+        const oModel = this.getView().getModel();
+        const oAction = oModel.bindContext(
+          `/ExpenseRequests(ID=${sID},IsActiveEntity=true)/ExpenseService.submit(...)`
+        );
+        await oAction.execute();
+      },
+
+      _clearForm() {
+        const oHeader = this._getInitialHeader();
         const oHeaderModel = this.getView().getModel("header");
-        oHeaderModel.setData({
-          Currency: "IDR",
-          ExpenseNotes: "",
-          _isValid: false,
-          _isValidItem: false,
-        });
-        oHeaderModel.refresh();
+        oHeaderModel.setData(oHeader);
 
-        // Reset Items
+        const oItems = this._getInitialItems();
         const oItemsModel = this.getView().getModel("items");
-        oItemsModel.setData({ items: [] });
-        oItemsModel.refresh();
+        oItemsModel.setData(oItems);
+
+        this._validateHeader();
       },
 
-      _validateItem: function () {
-        // Validate item fields and set value states
-        const oModel = this._itemDialog.getModel("item");
-        const oData = oModel.getData();
-        let bValid = true;
-
-        if (!oData.ExpenseType_Code) {
-          oData._ExpenseType_CodeState = "Error";
-          bValid = false;
-        } else {
-          oData._ExpenseType_CodeState = "None";
+      async onSaveAsDraftButtonPress() {
+        try {
+          const sID = await this._draft();
+          await this._activate(sID);
+          MessageBox.success("Expense request saved as draft", {
+            onClose: () => {
+              this._clearForm();
+              this.onPageCreateExpenseNavButtonPress();
+            }
+          });
+        } catch (oError) {
+          MessageBox.error(oError.message);
         }
-
-        if (!oData.ExpenseDate) {
-          oData._ExpenseDateState = "Error";
-          bValid = false;
-        } else {
-          oData._ExpenseDateState = "None";
-        }
-
-        if (!oData.Amount) {
-          oData._AmountState = "Error";
-          bValid = false;
-        } else {
-          oData._AmountState = "None";
-        }
-
-        oData._isValid = bValid;
-        oModel.refresh(true);
       },
 
-      _validateHeader: function () {
-        const oModel = this.getView().getModel("header");
-        const oData = oModel.getData();
-        let bValid = true;
-
-        if (!oData.Currency) {
-          oData._CurrencyState = "Error";
-          bValid = false;
-        } else {
-          oData._CurrencyState = "None";
+      async onSubmitRequestButtonPress() {
+        try {
+          const sID = await this._draft();
+          await this._activate(sID);
+          await this._submit(sID);
+          MessageBox.success("Expense request submitted successfully", {
+            onClose: () => {
+              this._clearForm();
+              this.onPageCreateExpenseNavButtonPress();
+            }
+          });
+        } catch (oError) {
+          MessageBox.error(oError.message);
         }
+      },
 
-        if (!oData.ExpenseNotes) {
-          oData._ExpenseNotesState = "Error";
-          bValid = false;
-        } else {
-          oData._ExpenseNotesState = "None";
+      async _loadItemDialog() {
+        if (!this._oItemDialog) {
+          this._oItemDialog = await this.loadFragment({
+            name: "expenseapproval.view.fragments.ItemDialog"
+          });
         }
+      },
 
-        oData._isValid = bValid;
+      async onAddNewItemButtonPress() {
+        await this._loadItemDialog();
+        const oItem = this._getInitialItem();
+        const oItemModel = new JSONModel(oItem);
+        this._oItemDialog.setModel(oItemModel, "item");
+        this._sDialogMode = "new";
+        this._validateItem();
+        this._oItemDialog.open();
+      },
+
+      onSaveButtonItemDialogPress() {
+        const oItemModel = this._oItemDialog.getModel("item");
+        const oItem = oItemModel.getData();
 
         const oItemsModel = this.getView().getModel("items");
         const aItems = oItemsModel.getProperty("/items");
-        oData._isValidItem = oData._isValid && !aItems.length == 0;
 
-        oModel.refresh(true);
-      },
-
-      _onFillInputItem: function (oEvent, oModel) {
-        // Update model property from input value
-        const oInput = oEvent.getSource();
-        const sValue = oEvent.getParameter("value");
-        const sPath = oInput.getBinding("value").getPath();
-
-        if (
-          sPath !== "/ExpenseType_Code" &&
-          sPath !== "/ExpenseDate" &&
-          sPath !== "/Currency"
-        ) {
-          oModel.setProperty(sPath, sValue);
+        if (this._sDialogMode === "new") {
+          aItems.push({ ...oItem });
+        } else if (this._sDialogMode === "edit") {
+          aItems[this._iEditIndex] = { ...oItem };
         }
+
+        oItemsModel.setProperty("/items", aItems);
+        this._validateHeader();
+
+        this._oItemDialog.close();
       },
 
-      _getIndexItems: function (oEvent) {
-        const oSource = oEvent.getSource();
-        const oContext = oSource.getBindingContext("items");
-        const sPath = oContext.getPath();
-        const iIndex = parseInt(sPath.split("/")[2], 10);
-        return iIndex;
+      onCancelButtonItemDialogPress() {
+        this._oItemDialog.close();
       },
 
-      _formatDateToYYYYMMDD: function (oDate) {
-        // Convert JS Date to yyyy-MM-dd string
-        const year = oDate.getFullYear();
-        const month = String(oDate.getMonth() + 1).padStart(2, "0");
-        const day = String(oDate.getDate()).padStart(2, "0");
-        return year + "-" + month + "-" + day;
+      _getItemIndex(oEvent) {
+        const sPath = oEvent.getSource().getBindingContext("items").getPath();
+        const aParts = sPath.split("/");
+        const iIndex = aParts[aParts.length - 1];
+
+        return parseInt(iIndex, 10);
       },
+
+      async onButtonEditItemPress(oEvent) {
+        await this._loadItemDialog();
+        const iIndex = this._getItemIndex(oEvent);
+
+        const oItemsModel = this.getView().getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+        const oItem = aItems[iIndex];
+        const oItemModel = new JSONModel({ ...oItem });
+        this._oItemDialog.setModel(oItemModel, "item");
+        this._sDialogMode = "edit";
+        this._iEditIndex = iIndex;
+        this._validateItem();
+        this._oItemDialog.open();
+      },
+
+      onButtonDeleteItemPress(oEvent) {
+        const iIndex = this._getItemIndex(oEvent);
+
+        const oItemsModel = this.getView().getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+
+        MessageBox.confirm("Are you sure delete this row?", {
+          actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.DELETE,
+          onClose: (sAction) => {
+            switch (sAction) {
+              case MessageBox.Action.DELETE:
+                aItems.splice(iIndex, 1);
+                oItemsModel.setProperty("/items", aItems);
+                this._validateHeader();
+                break;
+
+              default:
+                break;
+            }
+          },
+        })
+      },
+
+      formatDate(sValue) {
+        if (!sValue) return "";
+        const [sYear, sMonth, sDay] = sValue.split("-");
+        return `${sDay}/${sMonth}/${sYear}`;
+      },
+
+      _validateHeader() {
+        const oHeaderModel = this.getView().getModel("header");
+        const oHeader = oHeaderModel.getData();
+
+        oHeader._CurrencyState = (oHeader.Currency) ? "None" : "Error";
+        oHeader._ExpenseNotesState = (oHeader.ExpenseNotes) ? "None" : "Error";
+        oHeader._isValid = Boolean(oHeader.Currency && oHeader.ExpenseNotes);
+
+        const oItemsModel = this.getView().getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+        oHeader._isValidItem = Boolean(oHeader._isValid && aItems.length > 0);
+
+        oHeaderModel.refresh();
+      },
+
+      _validateItem() {
+        const oItemModel = this._oItemDialog.getModel("item");
+        const oItem = oItemModel.getData();
+
+        oItem._ExpenseType_CodeState = (oItem.ExpenseType_Code) ? "None" : "Error";
+        oItem._ExpenseDateState = (oItem.ExpenseDate) ? "None" : "Error";
+
+        const bAmountOk = Number(oItem.Amount) > 0;
+        oItem._AmountState = (bAmountOk) ? "None" : "Error";
+        oItem._isValid = Boolean(oItem.ExpenseType_Code && oItem.ExpenseDate && bAmountOk);
+
+        oItemModel.refresh();
+      },
+
+      onCurrencyInputLiveChange() {
+        this._validateHeader();
+      },
+
+      onExpenseNotesTextAreaLiveChange() {
+        this._validateHeader();
+      },
+
+      onExpenseTypeCodeInputLiveChange() {
+        this._validateItem();
+      },
+
+      onExpenseDateDatePickerChange() {
+        this._validateItem();
+      },
+
+      onAmountInputLiveChange() {
+        this._validateItem();
+      },
+
+      onCurrencyInputValueHelpRequest() {
+        if (!this._oCurrencyDialog) {
+          this._oCurrencyDialog = new SelectDialog({
+            title: "Select Currency",
+            items: {
+              path: "/Currencies",
+              template: new StandardListItem({ title: "{code}", description: "{name}" })
+            },
+            confirm: (oEvent) => {
+              const oSelectedItem = oEvent.getParameter("selectedItem");
+              if (oSelectedItem) {
+                const sCode = oSelectedItem.getTitle();
+
+                const oHeaderModel = this.getView().getModel("header");
+                oHeaderModel.setProperty("/Currency", sCode);
+
+                this._validateHeader();
+              }
+            }
+          });
+
+          this.getView().addDependent(this._oCurrencyDialog);
+        }
+
+        this._oCurrencyDialog.open();
+      },
+
+      onExpenseTypeCodeInputValueHelpRequest() {
+        if (!this._oExpenseTypeDialog) {
+          this._oExpenseTypeDialog = new SelectDialog({
+            title: "Select Expense Type",
+            items: {
+              path: "masterData>/ExpenseTypes",
+              template: new StandardListItem({ title: "{masterData>Code}", description: "{masterData>Description}" })
+            },
+            confirm: (oEvent) => {
+              const oSelectedItem = oEvent.getParameter("selectedItem");
+              if (oSelectedItem) {
+                const sCode = oSelectedItem.getTitle();
+
+                const oItemModel = this._oItemDialog.getModel("item");
+                oItemModel.setProperty("/ExpenseType_Code", sCode);
+
+                this._validateItem();
+              }
+            }
+          })
+
+          this.getView().addDependent(this._oExpenseTypeDialog);
+        }
+
+        this._oExpenseTypeDialog.open();
+      }
     });
-  }
-);
+  });
