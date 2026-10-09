@@ -59,6 +59,9 @@ sap.ui.define(
 
         try {
           await oAction.execute();
+          const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
+          const oBinding = oTable.getBinding("items");
+          oBinding.refresh();
           MessageBox.success(
             this.getView().getModel("i18n").getResourceBundle().getText("approvalSuccessApprove")
           );
@@ -100,6 +103,9 @@ sap.ui.define(
 
                 try {
                   await oAction.execute();
+                  const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
+                  const oBinding = oTable.getBinding("items");
+                  oBinding.refresh();
                   this._oRejectDialog.close();
                   MessageBox.success(oResourceBundle.getText("approvalSuccessReject"));
                 } catch (oError) {

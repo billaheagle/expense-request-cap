@@ -9,9 +9,7 @@ service ExpenseService {
             to   : 'employee'
         },
         {
-            grant: [
-                'READ',
-            ],
+            grant: ['READ', ],
             to   : 'employee',
             where: 'Employee.Email = $user'
         },
@@ -39,24 +37,29 @@ service ExpenseService {
                 'reimburse'
             ],
             to   : 'finance'
-        },
-        {
-            grant: '*',
-            to   : 'admin'
-        },
+        }
     ]
     entity ExpenseRequests  as
         projection on db.ExpenseRequests {
             *,
-            RequestNumber @readonly,
-            Status        @readonly,
+            RequestNumber    @readonly,
+            Employee         @readonly,
+            Status           @readonly,
+            SubmissionDate   @readonly,
+            ApprovalDate     @readonly,
+            Approver         @readonly,
+            TotalAmount      @readonly,
+            ReimbursedDate   @readonly,
+            ReimbursedBy     @readonly,
+            ExpenseItems     @readonly,
+            ExpenseApprovals @readonly,
         }
         actions {
-            action submit()                 returns {
+            action submit()                  returns {
                 @mandatory Status : String;
             };
 
-            action approve()                returns {
+            action approve()                 returns {
                 @mandatory Status : String;
             };
 
@@ -64,7 +67,7 @@ service ExpenseService {
                 @mandatory Status : String;
             };
 
-            action reimburse()              returns {
+            action reimburse()               returns {
                 @mandatory Status : String;
             };
         };

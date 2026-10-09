@@ -4,7 +4,11 @@ using {my.expense as db} from '../db/schema';
 service MasterDataService {
     @requires: 'admin'
     @odata.draft.enabled
-    entity Employees    as projection on db.Employees;
+    entity Employees    as
+        projection on db.Employees {
+            *,
+            EmployeeNumber @readonly
+        };
 
     @restrict: [
         {
