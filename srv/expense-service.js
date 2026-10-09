@@ -19,8 +19,8 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const aExpenseTypes = await SELECT.from(ExpenseTypes).where({ Code: { "IN": aCodes }, Active: true });
 
       for (const item of items) {
-        const oExpenseType = aExpenseTypes.find(t => t.Code = item.ExpenseType_Code);
-        if (!oExpenseType) req.reject(403, `Invalid Expense Type ${item.ExpenseType_Code}`);
+        const oExpenseType = aExpenseTypes.find(t => t.Code === item.ExpenseType_Code);
+        if (!oExpenseType) req.reject(400, `Invalid Expense Type ${item.ExpenseType_Code}`);
         result += (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount))
           ? Number(oExpenseType.MaxAmount) : Number(item.Amount);
       }
