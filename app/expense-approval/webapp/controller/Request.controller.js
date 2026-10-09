@@ -1,27 +1,27 @@
 /** @typedef {import("sap/ui/model/json/JSONModel").default} JSONModelType */
 
 sap.ui.define([
-  "sap/ui/core/mvc/Controller",
+  "expenseapproval/controller/BaseController",
   "sap/ui/model/json/JSONModel",
   "sap/ui/model/BindingMode",
   "sap/m/MessageBox",
-  "sap/ui/core/UIComponent",
   "sap/m/SelectDialog",
-  "sap/m/StandardListItem"
+  "sap/m/StandardListItem",
+  "expenseapproval/model/formatter"
 ],
   /**
-   * @param   {typeof import("sap/ui/core/mvc/Controller").default} Controller
+   * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
    * @param   {typeof import("sap/ui/model/json/JSONModel").default} JSONModel
    * @param   {typeof import("sap/ui/model/BindingMode").default} BindingMode
    * @param   {typeof import("sap/m/MessageBox").default} MessageBox
-   * @param   {typeof import("sap/ui/core/UIComponent").default} UIComponent
    * @param   {typeof import("sap/m/SelectDialog").default} SelectDialog
    * @param   {typeof import("sap/m/StandardListItem").default} StandardListItem
+   * @param   {typeof import("expenseapproval/model/formatter").default} formatter
    */
-  function (Controller, JSONModel, BindingMode, MessageBox, UIComponent, SelectDialog, StandardListItem) {
+  function (BaseController, JSONModel, BindingMode, MessageBox, SelectDialog, StandardListItem, formatter) {
     "use strict";
 
-    return Controller.extend("expenseapproval.controller.Request", {
+    return BaseController.extend("expenseapproval.controller.Request", {
       _getInitialHeader() {
         return {
           Currency: "IDR",
@@ -53,25 +53,25 @@ sap.ui.define([
         const oHeader = this._getInitialHeader();
         const oHeaderModel = new JSONModel(oHeader);
         oHeaderModel.setDefaultBindingMode(BindingMode.TwoWay);
-        this.getView().setModel(oHeaderModel, "header");
+        this.setModel(oHeaderModel, "header");
 
         const oItems = this._getInitialItems();
         const oItemsModel = new JSONModel(oItems);
         oItemsModel.setDefaultBindingMode(BindingMode.TwoWay);
-        this.getView().setModel(oItemsModel, "items");
+        this.setModel(oItemsModel, "items");
 
         this._validateHeader();
       },
 
       onPageCreateExpenseNavButtonPress() {
-        UIComponent.getRouterFor(this).navTo("home");
+        this.navTo("home");
       },
 
       _buildPayload() {
-        const oHeaderModel = this.getView().getModel("header");
+        const oHeaderModel = this.getModel("header")
         const oHeader = oHeaderModel.getData();
 
-        const oItemsModel = this.getView().getModel("items");
+        const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
         const oPayload = {
@@ -95,7 +95,7 @@ sap.ui.define([
       },
 
       async _draft() {
-        const oModel = this.getView().getModel();
+        const oModel = this.getModel();
         const oListBinding = oModel.bindList("/ExpenseRequests");
         const oPayload = this._buildPayload();
         const oContext = oListBinding.create(oPayload);
@@ -105,28 +105,20 @@ sap.ui.define([
       },
 
       async _activate(sID) {
-        const oModel = this.getView().getModel();
-        const oAction = oModel.bindContext(
-          `/ExpenseRequests(ID=${sID},IsActiveEntity=false)/ExpenseService.draftActivate(...)`
-        );
-        await oAction.execute();
+        this.executeAction(`/ExpenseRequests(ID=${sID},IsActiveEntity=false)/ExpenseService.draftActivate(...)`);
       },
 
       async _submit(sID) {
-        const oModel = this.getView().getModel();
-        const oAction = oModel.bindContext(
-          `/ExpenseRequests(ID=${sID},IsActiveEntity=true)/ExpenseService.submit(...)`
-        );
-        await oAction.execute();
+        this.executeAction(`/ExpenseRequests(ID=${sID},IsActiveEntity=true)/ExpenseService.submit(...)`);
       },
 
       _clearForm() {
         const oHeader = this._getInitialHeader();
-        const oHeaderModel = this.getView().getModel("header");
+        const oHeaderModel = this.getModel("header");
         oHeaderModel.setData(oHeader);
 
         const oItems = this._getInitialItems();
-        const oItemsModel = this.getView().getModel("items");
+        const oItemsModel = this.getModel("items");
         oItemsModel.setData(oItems);
 
         this._validateHeader();
@@ -143,7 +135,7 @@ sap.ui.define([
             }
           });
         } catch (oError) {
-          MessageBox.error(oError.message);
+          this.showError(oError.message)
         }
       },
 
@@ -159,7 +151,7 @@ sap.ui.define([
             }
           });
         } catch (oError) {
-          MessageBox.error(oError.message);
+          this.showError(oError.message);
         }
       },
 
@@ -185,7 +177,7 @@ sap.ui.define([
         const oItemModel = this._oItemDialog.getModel("item");
         const oItem = oItemModel.getData();
 
-        const oItemsModel = this.getView().getModel("items");
+        const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
         if (this._sDialogMode === "new") {
@@ -216,7 +208,7 @@ sap.ui.define([
         await this._loadItemDialog();
         const iIndex = this._getItemIndex(oEvent);
 
-        const oItemsModel = this.getView().getModel("items");
+        const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
         const oItem = aItems[iIndex];
         const oItemModel = new JSONModel({ ...oItem });
@@ -230,7 +222,7 @@ sap.ui.define([
       onButtonDeleteItemPress(oEvent) {
         const iIndex = this._getItemIndex(oEvent);
 
-        const oItemsModel = this.getView().getModel("items");
+        const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
         MessageBox.confirm("Are you sure delete this row?", {
@@ -252,20 +244,18 @@ sap.ui.define([
       },
 
       formatDate(sValue) {
-        if (!sValue) return "";
-        const [sYear, sMonth, sDay] = sValue.split("-");
-        return `${sDay}/${sMonth}/${sYear}`;
+        return formatter.formatDate(sValue);
       },
 
       _validateHeader() {
-        const oHeaderModel = this.getView().getModel("header");
+        const oHeaderModel = this.getModel("header");
         const oHeader = oHeaderModel.getData();
 
         oHeader._CurrencyState = (oHeader.Currency) ? "None" : "Error";
         oHeader._ExpenseNotesState = (oHeader.ExpenseNotes) ? "None" : "Error";
         oHeader._isValid = Boolean(oHeader.Currency && oHeader.ExpenseNotes);
 
-        const oItemsModel = this.getView().getModel("items");
+        const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
         oHeader._isValidItem = Boolean(oHeader._isValid && aItems.length > 0);
 
@@ -324,7 +314,7 @@ sap.ui.define([
               if (oSelectedItem) {
                 const sCode = oSelectedItem.getBindingContext().getProperty("code")
 
-                const oHeaderModel = this.getView().getModel("header");
+                const oHeaderModel = this.getModel("header");
                 oHeaderModel.setProperty("/Currency", sCode);
 
                 this._validateHeader();
@@ -332,7 +322,7 @@ sap.ui.define([
             }
           });
 
-          this.getView().addDependent(this._oCurrencyDialog);
+          this.addDependent(this._oCurrencyDialog);
         }
 
         this._oCurrencyDialog.open();
@@ -364,7 +354,7 @@ sap.ui.define([
             }
           })
 
-          this.getView().addDependent(this._oExpenseTypeDialog);
+          this.addDependent(this._oExpenseTypeDialog);
         }
 
         this._oExpenseTypeDialog.open();

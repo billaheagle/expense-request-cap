@@ -1,115 +1,97 @@
 sap.ui.define(
   [
-    "sap/ui/core/mvc/Controller",
+    "expenseapproval/controller/BaseController",
     "sap/m/MessageBox",
     "sap/m/Dialog",
     "sap/m/Button",
     "sap/m/TextArea",
-    "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator",
+    "expenseapproval/model/formatter"
   ],
-  function (
-    Controller,
+  /**
+   * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
+   * @param   {typeof import("sap/m/MessageBox").default} MessageBox
+   * @param   {typeof import("sap/m/Dialog").default} Dialog
+   * @param   {typeof import("sap/m/Button").default} Button
+   * @param   {typeof import("sap/m/TextArea").default} TextArea
+   * @param   {typeof import("expenseapproval/model/formatter").default} formatter
+   */
+  (
+    BaseController,
     MessageBox,
     Dialog,
     Button,
     TextArea,
-    Filter,
-    FilterOperator
-  ) {
+    formatter
+  ) => {
     "use strict";
 
-    return Controller.extend("expenseapproval.controller.Approval", {
+    return BaseController.extend("expenseapproval.controller.Approval", {
       onInit() { },
 
       onPageApprovalExpenseNavButtonPress() {
-        this.getOwnerComponent().getRouter().navTo("home");
+        this.navTo("home");
       },
 
       onSearchFieldApprovalSearch(oEvent) {
         const sQuery = oEvent.getParameter("query");
-        const aFilters = [];
-
-        if (sQuery && sQuery.length > 0) {
-          aFilters.push(
-            new Filter({
-              filters: [
-                new Filter("RequestNumber", FilterOperator.Contains, sQuery),
-                new Filter("Notes", FilterOperator.Contains, sQuery),
-              ],
-              and: false,
-            })
-          );
-        }
-
+        const aPaths = ["RequestNumber", "Notes"];
+        const aFilters = this.createSearchFilter(sQuery, aPaths);
         const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
         const oBinding = oTable.getBinding("items");
         oBinding.filter(aFilters);
       },
 
       async onButtonApprovePress(oEvent) {
-        /** @type {sap.ui.model.odata.v4.Context} */
         const oContext = oEvent.getSource().getBindingContext();
-        if (!oContext) {
-          return;
-        }
-        const oModel = this.getView().getModel();
-
-        const oAction = oModel.bindContext("ExpenseService.approve(...)", oContext);
+        if (!oContext) return;
 
         try {
-          await oAction.execute();
+          await this.executeAction("ExpenseService.approve(...)", oContext);
           const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
           const oBinding = oTable.getBinding("items");
           oBinding.refresh();
           MessageBox.success(
-            this.getView().getModel("i18n").getResourceBundle().getText("approvalSuccessApprove")
+            this.getText("approvalSuccessApprove")
           );
         } catch (oError) {
-          MessageBox.error(oError.message);
+          this.showError(oError.message);
         }
       },
 
       onButtonRejectPress(oEvent) {
-        /** @type {sap.ui.model.odata.v4.Context} */
         const oContext = oEvent.getSource().getBindingContext();
-        if (!oContext) {
-          return;
-        }
+        if (!oContext) return;
+
         this._oSelectedContext = oContext;
-        const oResourceBundle = this.getView().getModel("i18n").getResourceBundle();
 
         if (!this._oRejectDialog) {
           this._oTextArea = new TextArea({
             width: "100%",
-            placeholder: oResourceBundle.getText("approvalPlaceholderComment"),
+            placeholder: this.getText("approvalPlaceholderComment")
           });
 
           this._oRejectDialog = new Dialog({
-            title: oResourceBundle.getText("approvalBtnReject"),
+            title: this.getText("approvalBtnReject"),
             type: "Message",
             content: this._oTextArea,
             beginButton: new Button({
               type: "Emphasized",
-              text: oResourceBundle.getText("approvalBtnReject"),
+              text: this.getText("approvalBtnReject"),
               press: async () => {
                 const sComment = this._oTextArea.getValue();
-                const oModel = this.getView().getModel();
-                const oAction = oModel.bindContext(
-                  "ExpenseService.decline(...)",
-                  this._oSelectedContext
-                );
-                oAction.setParameter("Comments", sComment);
+                const mParams = {
+                  Comments: sComment
+                }
 
                 try {
-                  await oAction.execute();
+                  await this.executeAction("ExpenseService.decline(...)", this._oSelectedContext, mParams);
                   const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
                   const oBinding = oTable.getBinding("items");
                   oBinding.refresh();
                   this._oRejectDialog.close();
-                  MessageBox.success(oResourceBundle.getText("approvalSuccessReject"));
+                  MessageBox.success(this.getText("approvalSuccessReject"));
                 } catch (oError) {
-                  MessageBox.error(oError.message);
+                  this.showError(oError.message);
                 }
               },
             }),
@@ -123,21 +105,14 @@ sap.ui.define(
               this._oTextArea.setValue("");
             },
           });
-          this.getView().addDependent(this._oRejectDialog);
+          this.addDependent(this._oRejectDialog);
         }
 
         this._oRejectDialog.open();
       },
 
       formatDate(sValue) {
-        if (!sValue) {
-          return "";
-        }
-        const oDate = new Date(sValue);
-        const day = String(oDate.getDate()).padStart(2, "0");
-        const month = String(oDate.getMonth() + 1).padStart(2, "0");
-        const year = oDate.getFullYear();
-        return `${day}/${month}/${year}`;
+        formatter.formatDate(sValue);
       },
     });
   }

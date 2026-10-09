@@ -1,19 +1,23 @@
-sap.ui.define(["sap/ui/core/mvc/Controller"], (Controller) => {
-  "use strict";
+sap.ui.define(["expenseapproval/controller/BaseController"],
+  /**
+   * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
+   */
+  (BaseController) => {
+    "use strict";
 
-  return Controller.extend("expenseapproval.controller.ExpenseApproval", {
-    onInit() { },
+    return BaseController.extend("expenseapproval.controller.ExpenseApproval", {
+      onInit() { },
 
-    onGenericTileRequestPress() {
-      this.getOwnerComponent().getRouter().navTo("request");
-    },
+      onGenericTileRequestPress() {
+        this.navTo("request");
+      },
 
-    onGenericTileReportPress() {
-      this.getOwnerComponent().getRouter().navTo("report");
-    },
+      onGenericTileReportPress() {
+        this.navTo("report");
+      },
 
-    onGenericTileApprovalPress() {
-      this.getOwnerComponent().getRouter().navTo("approval");
-    },
+      onGenericTileApprovalPress() {
+        this.navTo("approval");
+      },
+    });
   });
-});

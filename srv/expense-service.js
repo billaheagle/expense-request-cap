@@ -11,6 +11,8 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       return employee;
     }
 
+    this.on("userInfo", req => ({ id: req.user.id, roles: Object.keys(req.user.roles) }));
+
     async function sumItems(req, items) {
       let result = 0;
       if (!Array.isArray(items)) return result;
