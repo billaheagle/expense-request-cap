@@ -11,16 +11,18 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       return employee;
     }
 
-    async function sumItems(items) {
+    async function sumItems(req, items) {
       let result = 0;
       if (!Array.isArray(items)) return result;
 
+      const aCodes = items.map(i => i.ExpenseType_Code);
+      const aExpenseTypes = await SELECT.from(ExpenseTypes).where({ Code: { "IN": aCodes }, Active: true });
+
       for (const item of items) {
-        const oExpenseType = await SELECT.one.from(ExpenseTypes).where({ Code: item.ExpenseType_Code });
-        console.log(oExpenseType)
+        const oExpenseType = aExpenseTypes.find(t => t.Code = item.ExpenseType_Code);
+        if (!oExpenseType) req.reject(403, `Invalid Expense Type ${item.ExpenseType_Code}`);
         result += (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount))
-        ? Number(oExpenseType.MaxAmount) : Number(item.Amount);
-        console.log(result)
+          ? Number(oExpenseType.MaxAmount) : Number(item.Amount);
       }
 
       return result;
@@ -39,7 +41,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const employee = await getCurrentEmployee(req);
       req.data.Employee_ID = employee.ID;
 
-      req.data.TotalAmount = await sumItems(req.data.ExpenseItems);
+      req.data.TotalAmount = await sumItems(req, req.data.ExpenseItems);
       req.data.Status = 'Draft';
     });
 
@@ -54,7 +56,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Edit`);
       req.data.Employee_ID = employee.ID;
 
-      req.data.TotalAmount = await sumItems(req.data.ExpenseItems);
+      req.data.TotalAmount = await sumItems(req, req.data.ExpenseItems);
       req.data.Status = 'Draft';
     });
 
@@ -72,7 +74,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
       const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: expenseRequest.ID });
       if (expenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
-      const totalAmount = await sumItems(expenseItems);
+      const totalAmount = await sumItems(req, expenseItems);
       const requestNumber = await getNextRequestNumber(req);
 
       await UPDATE(ExpenseRequests)

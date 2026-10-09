@@ -322,7 +322,7 @@ sap.ui.define([
             confirm: (oEvent) => {
               const oSelectedItem = oEvent.getParameter("selectedItem");
               if (oSelectedItem) {
-                const sCode = oSelectedItem.getBindingContext("/Currencies").getProperty("code")
+                const sCode = oSelectedItem.getBindingContext("Currencies").getProperty("code")
 
                 const oHeaderModel = this.getView().getModel("header");
                 oHeaderModel.setProperty("/Currency", sCode);
@@ -349,7 +349,6 @@ sap.ui.define([
                   path: "masterData>MaxAmount",
                   formatter: (sMaxAmount) => Number(sMaxAmount) > 0 ? `Max ${sMaxAmount}` : `No Limit`
                 }
-                /* title: "{masterData>Code}", description: "{masterData>Description}" */
               })
             },
             confirm: (oEvent) => {
