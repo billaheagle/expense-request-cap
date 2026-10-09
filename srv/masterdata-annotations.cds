@@ -1,119 +1,137 @@
-using MasterDataService from './masterdata-service';
+using MasterDataService as service from './masterdata-service';
 
-annotate MasterDataService.Employees with {
-    @capabilities.Insertable: true
-    @capabilities.Updatable : true
-    @capabilities.Deletable : true
+annotate service.NumberRanges with {
+    Year       @title: 'Year';
+    LastNumber @title: 'Last Number';
+};
 
-    @UI.HeaderInfo          : {
+annotate service.NumberRanges with @(
+    UI.HeaderInfo     : {
+        TypeName      : 'Number Range',
+        TypeNamePlural: 'Number Ranges',
+        Title         : {Value: Year}
+    },
+    UI.SelectionFields: [Year],
+    UI.LineItem       : [
+        {Value: Year},
+        {Value: LastNumber}
+    ]
+);
+
+
+annotate service.Employees with {
+    ID             @UI.Hidden;
+    EmployeeNumber @title: 'Employee No.';
+    FirstName      @title: 'First Name';
+    LastName       @title: 'Last Name';
+    Email          @title: 'Email';
+    CostCenter     @title: 'Cost Center';
+    Country        @title: 'Country';
+    Active         @title: 'Active';
+    Manager        @title                 : 'Manager'
+                   @Common.Text           : Manager.LastName
+                   @Common.TextArrangement: #TextFirst;
+};
+
+annotate service.Employees with @(
+    UI.HeaderInfo              : {
         TypeName      : 'Employee',
         TypeNamePlural: 'Employees',
-        Title         : {Value: FirstName},
-        Description   : {Value: EmployeeNumber}
-    }
-
-    @UI.SelectionFields     : [
-        {Value: EmployeeNumber},
-        {Value: Email},
-        {Value: CostCenter},
-        {Value: Active}
-    ]
-
-    @UI.LineItem            : [
-        {
-            Value: EmployeeNumber,
-            Label: 'Employee No.'
-        },
-        {Value: FirstName},
-        {Value: LastName},
-        {Value: Email},
-        {Value: Manager},
-        {Value: CostCenter},
-        {Value: Country},
-        {Value: Active}
-    ]
-
-    @UI.Identification      : [
+        Title         : {Value: LastName},
+        Description   : {Value: EmployeeNumber},
+    },
+    UI.SelectionFields         : [
+        EmployeeNumber,
+        Email,
+        CostCenter,
+        Active
+    ],
+    UI.LineItem                : [
         {Value: EmployeeNumber},
         {Value: FirstName},
         {Value: LastName},
-        {Value: Email}
-    ]
-
-    @UI.Facets              : [
+        {Value: Email},
+        {Value: CostCenter},
+        {Value: Country_code},
+        {Value: Active}
+    ],
+    UI.FieldGroup #General     : {Data: [
+        {Value: EmployeeNumber},
+        {Value: FirstName},
+        {Value: LastName},
+        {Value: Email},
+        {Value: Active}
+    ]},
+    UI.FieldGroup #Organization: {Data: [
+        {Value: Manager_ID},
+        {Value: CostCenter},
+        {Value: Country_code}
+    ]},
+    UI.Facets                  : [
         {
             $Type : 'UI.ReferenceFacet',
+            ID    : 'General',
             Label : 'General Information',
             Target: '@UI.FieldGroup#General'
         },
         {
             $Type : 'UI.ReferenceFacet',
-            Label : 'Organization Information',
+            ID    : 'Organization',
+            Label : 'Organization',
             Target: '@UI.FieldGroup#Organization'
         }
     ]
+);
 
-    EmployeeNumber @UI.FieldGroup #General;
-    FirstName      @UI.FieldGroup #General;
-    LastName       @UI.FieldGroup #General;
-    Email          @UI.FieldGroup #General;
-    CostCenter     @UI.FieldGroup #General;
-    Country        @UI.FieldGroup #General;
-    Active         @UI.FieldGroup #General;
+annotate service.Employees with @cds.odata.valuelist;
 
-    Manager        @UI.FieldGroup #Organization;
-}
+annotate service.ExpenseTypes with {
+    Code            @title: 'Code';
+    Description     @title: 'Description'  @mandatory;
+    ReceiptRequired @title: 'Receipt Required';
+    MaxAmount       @title: 'Max Amount';
+    Active          @title: 'Active';
+};
 
-annotate MasterDataService.ExpenseTypes with {
-    @capabilities.Insertable: true
-    @capabilities.Updatable : true
-    @capabilities.Deletable : true
-
-    @UI.HeaderInfo          : {
+annotate service.ExpenseTypes with @(
+    UI.HeaderInfo         : {
         TypeName      : 'Expense Type',
         TypeNamePlural: 'Expense Types',
         Title         : {Value: Description},
         Description   : {Value: Code}
-    }
-
-    @UI.SelectionFields     : [
+    },
+    UI.SelectionFields    : [
+        Code,
+        Active
+    ],
+    UI.LineItem           : [
         {Value: Code},
-        {Value: Description},
-        {Value: Active}
-    ]
-
-    @UI.LineItem            : [
-        {
-            Value: Code,
-            Label: 'Expense Type Code'
-        },
         {Value: Description},
         {Value: ReceiptRequired},
         {Value: MaxAmount},
         {Value: Active}
-    ]
-
-    @UI.Identification      : [
+    ],
+    UI.FieldGroup #General: {Data: [
         {Value: Code},
-        {Value: Description}
-    ]
-
-    @UI.Facets              : [
+        {Value: Description},
+        {Value: Active}
+    ]},
+    UI.FieldGroup #Policy : {Data: [
+        {Value: ReceiptRequired},
+        {Value: MaxAmount}
+    ]},
+    UI.Facets             : [
         {
             $Type : 'UI.ReferenceFacet',
+            ID    : 'General',
             Label : 'General Information',
             Target: '@UI.FieldGroup#General'
         },
         {
             $Type : 'UI.ReferenceFacet',
-            Label : 'Policy Information',
+            ID    : 'Policy',
+            Label : 'Policy',
             Target: '@UI.FieldGroup#Policy'
         }
     ]
-
-    Code            @UI.FieldGroup #General;
-    Description     @UI.FieldGroup #General;
-    ReceiptRequired @UI.FieldGroup #Policy;
-    MaxAmount       @UI.FieldGroup #Policy;
-    Active          @UI.FieldGroup #General;
-}
+);

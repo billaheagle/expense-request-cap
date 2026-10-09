@@ -32,13 +32,13 @@ module.exports = class MasterDataService extends cds.ApplicationService {
 
     this.before(['CREATE', 'UPDATE'], ExpenseTypes, async (req) => {
       const oCurrent = req.event === 'UPDATE' ? await SELECT.one.from(req.subject) : {};
-      if (!oCurrent) req.reject(404, "Expense type not found"); 
+      if (!oCurrent) req.reject(404, "Expense type not found");
       if (oCurrent.Active === false && req.data.Active !== true) req.reject(409, "Inactive expense types cannot be modified. Reactivate it first.");
 
       const oMerged = { ...oCurrent, ...req.data };
       const bHasMaxAmount = oMerged.MaxAmount !== null && oMerged.MaxAmount !== undefined;
 
-      if (oMerged.ReceiptRequired === false && !bHasMaxAmount) req.reject(400, "MaxAmount is required when no receipt is required");
+      if (oMerged.ReceiptRequired === false && !bHasMaxAmount) req.reject({ status: 400, message: "MaxAmount is required when no receipt is required", target: 'MaxAmount' });
       if (bHasMaxAmount && Number(oMerged.MaxAmount) <= 0) req.reject(400, "MaxAmount must be greater than 0");
     });
 

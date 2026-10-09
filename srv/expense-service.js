@@ -1,9 +1,10 @@
 const cds = require('@sap/cds');
+const { UPDATE, SELECT } = require('@sap/cds/lib/ql/cds-ql');
 
 module.exports = class ExpenseService extends cds.ApplicationService {
   async init() {
     const { ExpenseRequests, ExpenseApprovals, ExpenseItems } = this.entities
-    const { Employees } = cds.entities('my.expense')
+    const { Employees, NumberRanges } = cds.entities('my.expense')
 
     async function getCurrentEmployee(req) {
       const employee = await SELECT.one.from(Employees).where({ Email: req.user.id });
@@ -26,18 +27,13 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (!req.user.is("employee")) req.reject(403, 'Only employees can create expense requests');
     })
 
-    async function getNextRequestNumber() {
-      const year = new Date().getFullYear();
-      const last = await SELECT.one.from(ExpenseRequests).columns('RequestNumber')
-        .where({ RequestNumber: { 'LIKE': `REQ-${year}-%` } })
-        .orderBy('RequestNumber desc');
+    async function getNextRequestNumber(req) {
+      const year = String(new Date().getFullYear());
 
-      let next = 1;
-      if (last?.RequestNumber) {
-        const [, , , seq] = last.RequestNumber.match(/^(\w+)-(\d{4})-(\d+)$/);
-        next = parseInt(seq, 10) + 1;
-      }
-      return `REQ-${year}-${String(next).padStart(6, "0")}`
+      const iUpdated = await UPDATE(NumberRanges).set({ LastNumber: { '+=': 1 } }).where({ Year: year });
+      if (iUpdated === 0) req.reject(500, `Number range for ${year} is not maintained`);
+      const oNumberRange = await SELECT.one.from(NumberRanges).where({ Year: year });
+      return `REQ-${year}-${String(oNumberRange.LastNumber).padStart(6, "0")}`
     }
 
     this.before('CREATE', ExpenseRequests, async (req) => {
@@ -74,7 +70,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const expenseRequest = await SELECT.one.from(req.subject)
       if (!expenseRequest) req.reject(404, 'Request not found');
 
-
       if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be submitted`);
 
       const employee = await getCurrentEmployee(req);
@@ -84,7 +79,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: expenseRequest.ID });
       if (expenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
       const totalAmount = sumItems(expenseItems);
-      const requestNumber = await getNextRequestNumber();
+      const requestNumber = await getNextRequestNumber(req);
 
       await UPDATE(ExpenseRequests)
         .set({ Status: 'Submitted', SubmissionDate: new Date(), TotalAmount: totalAmount, RequestNumber: requestNumber })

@@ -31,20 +31,17 @@ entity Employees : cuid, managed {
     Active         : Boolean default true not null;
 }
 
-/* entity ExpenseTypes : cuid, managed {
-    Code            : String(10) not null;
-    Description     : String(50) not null;
-    ReceiptRequired : Boolean not null;
-    MaxAmount       : Decimal(15, 2);
-    Active          : Boolean default true not null;
-} */
-
 entity ExpenseTypes : managed {
     key Code            : String(10) not null;
         Description     : String(50) not null;
-        ReceiptRequired : Boolean not null;
+        ReceiptRequired : Boolean default false not null;
         MaxAmount       : Decimal(15, 2);
         Active          : Boolean default true not null;
+}
+
+entity NumberRanges {
+    key Year       : String(4);
+        LastNumber : Integer default 0 not null;
 }
 
 @odata.draft.enabled
@@ -52,7 +49,7 @@ entity ExpenseRequests : cuid, managed {
     RequestNumber    : String(15);
     Notes            : String(255) not null;
     Employee         : Association to Employees not null;
-    Status           : Status default #Draft not null;
+    Status           : Status default #Draft not null @assert.range;
     SubmissionDate   : DateTime;
     ApprovalDate     : DateTime;
     Approver         : Association to Employees;
@@ -62,7 +59,7 @@ entity ExpenseRequests : cuid, managed {
     ReimbursedBy     : Association to Employees;
     ExpenseItems     : Composition of many ExpenseItems
                            on ExpenseItems.ExpenseRequest = $self;
-    ExpenseApprovals : Composition of many ExpenseApprovals
+    ExpenseApprovals : Association to many ExpenseApprovals
                            on ExpenseApprovals.ExpenseRequest = $self;
 }
 
@@ -79,7 +76,7 @@ entity ExpenseItems : cuid, managed {
 entity ExpenseApprovals : cuid, managed {
     ExpenseRequest : Association to ExpenseRequests not null;
     Approver       : Association to Employees not null;
-    Decision       : Decision not null;
+    Decision       : Decision not null @assert.range;
     DecisionDate   : DateTime not null;
     Comments       : String(255);
 }
