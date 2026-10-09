@@ -105,11 +105,11 @@ sap.ui.define([
       },
 
       async _activate(sID) {
-        this.executeAction(`/ExpenseRequests(ID=${sID},IsActiveEntity=false)/ExpenseService.draftActivate(...)`);
+        await this.executeAction(`/ExpenseRequests(ID=${sID},IsActiveEntity=false)/ExpenseService.draftActivate(...)`);
       },
 
       async _submit(sID) {
-        this.executeAction(`/ExpenseRequests(ID=${sID},IsActiveEntity=true)/ExpenseService.submit(...)`);
+        await this.executeAction(`/ExpenseRequests(ID=${sID},IsActiveEntity=true)/ExpenseService.submit(...)`);
       },
 
       _clearForm() {

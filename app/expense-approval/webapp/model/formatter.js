@@ -6,6 +6,7 @@ sap.ui.define([
         return {
             formatDate(sValue) {
                 if (!sValue) return "";
+                sValue = sValue.slice(0, 10);
                 const [sYear, sMonth, sDay] = sValue.split("-");
                 return `${sDay}/${sMonth}/${sYear}`;
             },

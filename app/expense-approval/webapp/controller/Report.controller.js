@@ -7,7 +7,7 @@ sap.ui.define(
   function (BaseController, formatter) {
     "use strict";
 
-    return Controller.extend("expenseapproval.controller.Report", {
+    return BaseController.extend("expenseapproval.controller.Report", {
       onInit() { },
 
       onPageReportExpenseNavButtonPress() {

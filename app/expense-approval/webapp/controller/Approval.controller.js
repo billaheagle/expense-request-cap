@@ -112,7 +112,7 @@ sap.ui.define(
       },
 
       formatDate(sValue) {
-        formatter.formatDate(sValue);
+        return formatter.formatDate(sValue);
       },
     });
   }

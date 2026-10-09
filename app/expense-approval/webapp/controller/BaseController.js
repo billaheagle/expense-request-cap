@@ -41,7 +41,7 @@ sap.ui.define([
                 this.getView().setModel(oModel, sName);
             },
 
-            addDependent(oModel, oObject) {
+            addDependent(oObject) {
                 this.getView().addDependent(oObject);
             },
 
