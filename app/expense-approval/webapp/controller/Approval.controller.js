@@ -93,7 +93,7 @@ sap.ui.define(
                 const sComment = this._oTextArea.getValue();
                 const oModel = this.getView().getModel();
                 const oAction = oModel.bindContext(
-                  "ExpenseService.reject(...)",
+                  "ExpenseService.decline(...)",
                   this._oSelectedContext
                 );
                 oAction.setParameter("Comments", sComment);

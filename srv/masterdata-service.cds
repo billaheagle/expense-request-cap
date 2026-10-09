@@ -21,7 +21,7 @@ service MasterDataService {
 
     @restrict: [
         {
-            grant: ['READ', 'UPDATE'],
+            grant: ['READ'],
             to   : 'authenticated-user'
         },
         {

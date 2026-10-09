@@ -4,12 +4,48 @@ using {my.expense as db} from '../db/schema';
 service ExpenseService {
     @odata.draft.enabled
     @restrict: [
-        { grant: ['READ', 'UPDATE', 'DELETE', 'submit'], to: 'employee', where: 'Employee.Email = $user' },
-        { grant: 'CREATE', to: 'employee' },
-        { grant: ['READ', 'approve', 'reject'], to: 'manager', where: 'Employee.Manager.Email = $user' },
-        { grant: ['READ', 'reimburse'], to: 'finance' },
+        {
+            grant: 'CREATE',
+            to   : 'employee'
+        },
+        {
+            grant: [
+                'READ',
+            ],
+            to   : 'employee',
+            where: 'Employee.Email = $user'
+        },
+        {
+            grant: [
+                'UPDATE',
+                'DELETE',
+                'submit'
+            ],
+            to   : 'employee',
+            where: 'Employee.Email = $user AND Status = `Draft`'
+        },
+        {
+            grant: [
+                'READ',
+                'approve',
+                'decline'
+            ],
+            to   : 'manager',
+            where: 'Employee.Manager.Email = $user'
+        },
+        {
+            grant: [
+                'READ',
+                'reimburse'
+            ],
+            to   : 'finance'
+        },
+        {
+            grant: '*',
+            to   : 'admin'
+        },
     ]
-    entity ExpenseRequests as
+    entity ExpenseRequests  as
         projection on db.ExpenseRequests {
             *,
             RequestNumber @readonly,
@@ -24,7 +60,7 @@ service ExpenseService {
                 @mandatory Status : String;
             };
 
-            action reject(Comments: String) returns {
+            action decline(Comments: String) returns {
                 @mandatory Status : String;
             };
 
@@ -34,7 +70,7 @@ service ExpenseService {
         };
 
     @readonly
-    entity Employees       as
+    entity Employees        as
         projection on db.Employees {
             ID,
             FirstName,
@@ -42,4 +78,7 @@ service ExpenseService {
             Email,
             Manager
         };
+
+    @readonly
+    entity ExpenseApprovals as projection on db.ExpenseApprovals;
 }

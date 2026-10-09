@@ -1,5 +1,4 @@
 const cds = require('@sap/cds');
-const { UPDATE, SELECT } = require('@sap/cds/lib/ql/cds-ql');
 
 module.exports = class ExpenseService extends cds.ApplicationService {
   async init() {
@@ -23,10 +22,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       return result;
     }
 
-    this.before('CREATE', ExpenseRequests.drafts, async (req) => {
-      if (!req.user.is("employee")) req.reject(403, 'Only employees can create expense requests');
-    })
-
     async function getNextRequestNumber(req) {
       const year = String(new Date().getFullYear());
 
@@ -37,8 +32,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     }
 
     this.before('CREATE', ExpenseRequests, async (req) => {
-      if (!req.user.is("employee")) req.reject(403, 'Only employees can create expense requests');
-
       const employee = await getCurrentEmployee(req);
       req.data.Employee_ID = employee.ID;
 
@@ -47,8 +40,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     });
 
     this.before('UPDATE', ExpenseRequests, async (req) => {
-      if (!req.user.is("employee")) req.reject(403, 'Only employees can edit expense requests');
-
       const expenseRequest = await SELECT.one.from(req.subject)
       if (!expenseRequest) req.reject(404, 'Request not found');
 
@@ -64,7 +55,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     });
 
     this.on('submit', ExpenseRequests, async (req) => {
-      if (!req.user.is("employee")) req.reject(403, 'Only employee can run this process');
       const ID = req.params[0].ID;
 
       const expenseRequest = await SELECT.one.from(req.subject)
@@ -89,7 +79,6 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     });
 
     async function decide(req, decision) {
-      if (!req.user.is("manager")) req.reject(403, 'Only manager can decide this requests');
       const ID = req.params[0].ID;
 
       const expenseRequest = await SELECT.one.from(req.subject)
@@ -115,10 +104,9 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     }
 
     this.on('approve', ExpenseRequests, (req) => decide(req, 'Approved'));
-    this.on('reject', ExpenseRequests, (req) => decide(req, 'Rejected'));
+    this.on('decline', ExpenseRequests, (req) => decide(req, 'Rejected'));
 
     this.on('reimburse', ExpenseRequests, async (req) => {
-      if (!req.user.is("finance")) req.reject(403, 'Only finance can run this process');
       const ID = req.params[0].ID;
 
       const expenseRequest = await SELECT.one.from(req.subject)
