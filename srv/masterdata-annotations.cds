@@ -87,8 +87,11 @@ annotate service.Employees with @cds.odata.valuelist;
 
 annotate service.ExpenseTypes with {
     Code            @title: 'Code';
-    Description     @title: 'Description'  @mandatory;
+    Description     @title                 : 'Description'  @mandatory;
     ReceiptRequired @title: 'Receipt Required';
+    Currency        @title                 : 'Currency'
+                    @Common.Text           : Currency.symbol
+                    @Common.TextArrangement: #TextLast;
     MaxAmount       @title: 'Max Amount';
     Active          @title: 'Active';
 };
@@ -108,6 +111,7 @@ annotate service.ExpenseTypes with @(
         {Value: Code},
         {Value: Description},
         {Value: ReceiptRequired},
+        {Value: Currency_code},
         {Value: MaxAmount},
         {Value: Active}
     ],
@@ -118,6 +122,7 @@ annotate service.ExpenseTypes with @(
     ]},
     UI.FieldGroup #Policy : {Data: [
         {Value: ReceiptRequired},
+        {Value: Currency_code},
         {Value: MaxAmount}
     ]},
     UI.Facets             : [

@@ -35,6 +35,7 @@ entity ExpenseTypes : managed {
     key Code            : String(10) not null;
         Description     : String(50) not null;
         ReceiptRequired : Boolean default false not null;
+        Currency        : Currency not null;
         MaxAmount       : Decimal(15, 2);
         Active          : Boolean default true not null;
 }

@@ -7,7 +7,7 @@ service MasterDataService {
     entity Employees    as
         projection on db.Employees {
             *,
-            EmployeeNumber @readonly
+            EmployeeNumber @Core.Immutable
         };
 
     @restrict: [

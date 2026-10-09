@@ -1,6 +1,6 @@
-Code,Description,ReceiptRequired,MaxAmount,Active
-MEAL,Meals,false,50,true
-HOTEL,Hotel,true,,true
-TRAVEL,Travel,true,,true
-TAXI,Taxi,false,30,true
-OFFICE,Office Supplies,false,100,true
+Code,Description,ReceiptRequired,Currency_code,MaxAmount,Active
+MEAL,Meals,false,IDR,50,true
+HOTEL,Hotel,true,IDR,,true
+TRAVEL,Travel,true,IDR,,true
+TAXI,Taxi,false,IDR,30,true
+OFFICE,Office Supplies,false,IDR,100,true

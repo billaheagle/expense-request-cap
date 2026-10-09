@@ -312,12 +312,17 @@ sap.ui.define([
             title: "Select Currency",
             items: {
               path: "/Currencies",
-              template: new StandardListItem({ title: "{code}", description: "{name}" })
+              template: new StandardListItem({
+                title: {
+                  parts: ["code", "symbol"],
+                  formatter: (sCode, sSymbol) => `${sCode} (${sSymbol})`
+                }, description: "{name}"
+              })
             },
             confirm: (oEvent) => {
               const oSelectedItem = oEvent.getParameter("selectedItem");
               if (oSelectedItem) {
-                const sCode = oSelectedItem.getTitle();
+                const sCode = oSelectedItem.getBindingContext("/Currencies").getProperty("code")
 
                 const oHeaderModel = this.getView().getModel("header");
                 oHeaderModel.setProperty("/Currency", sCode);
@@ -339,12 +344,18 @@ sap.ui.define([
             title: "Select Expense Type",
             items: {
               path: "masterData>/ExpenseTypes",
-              template: new StandardListItem({ title: "{masterData>Code}", description: "{masterData>Description}" })
+              template: new StandardListItem({
+                title: "{masterData>Description}", description: {
+                  path: "masterData>MaxAmount",
+                  formatter: (sMaxAmount) => Number(sMaxAmount) > 0 ? `Max ${sMaxAmount}` : `No Limit`
+                }
+                /* title: "{masterData>Code}", description: "{masterData>Description}" */
+              })
             },
             confirm: (oEvent) => {
               const oSelectedItem = oEvent.getParameter("selectedItem");
               if (oSelectedItem) {
-                const sCode = oSelectedItem.getTitle();
+                const sCode = oSelectedItem.getBindingContext("masterData").getProperty("Code");
 
                 const oItemModel = this._oItemDialog.getModel("item");
                 oItemModel.setProperty("/ExpenseType_Code", sCode);

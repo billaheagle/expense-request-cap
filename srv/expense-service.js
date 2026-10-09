@@ -3,7 +3,7 @@ const cds = require('@sap/cds');
 module.exports = class ExpenseService extends cds.ApplicationService {
   async init() {
     const { ExpenseRequests, ExpenseApprovals, ExpenseItems } = this.entities
-    const { Employees, NumberRanges } = cds.entities('my.expense')
+    const { Employees, NumberRanges, ExpenseTypes } = cds.entities('my.expense')
 
     async function getCurrentEmployee(req) {
       const employee = await SELECT.one.from(Employees).where({ Email: req.user.id });
@@ -11,12 +11,16 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       return employee;
     }
 
-    function sumItems(items) {
+    async function sumItems(items) {
       let result = 0;
       if (!Array.isArray(items)) return result;
 
       for (const item of items) {
-        result += Number(item.Amount) || 0;
+        const oExpenseType = await SELECT.one.from(ExpenseTypes).where({ Code: item.ExpenseType_Code });
+        console.log(oExpenseType)
+        result += (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount))
+        ? Number(oExpenseType.MaxAmount) : Number(item.Amount);
+        console.log(result)
       }
 
       return result;
@@ -35,7 +39,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const employee = await getCurrentEmployee(req);
       req.data.Employee_ID = employee.ID;
 
-      req.data.TotalAmount = sumItems(req.data.ExpenseItems);
+      req.data.TotalAmount = await sumItems(req.data.ExpenseItems);
       req.data.Status = 'Draft';
     });
 
@@ -50,7 +54,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Edit`);
       req.data.Employee_ID = employee.ID;
 
-      req.data.TotalAmount = sumItems(req.data.ExpenseItems);
+      req.data.TotalAmount = await sumItems(req.data.ExpenseItems);
       req.data.Status = 'Draft';
     });
 
@@ -68,7 +72,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
       const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: expenseRequest.ID });
       if (expenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
-      const totalAmount = sumItems(expenseItems);
+      const totalAmount = await sumItems(expenseItems);
       const requestNumber = await getNextRequestNumber(req);
 
       await UPDATE(ExpenseRequests)

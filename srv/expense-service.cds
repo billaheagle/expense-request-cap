@@ -51,7 +51,6 @@ service ExpenseService {
             TotalAmount      @readonly,
             ReimbursedDate   @readonly,
             ReimbursedBy     @readonly,
-            ExpenseItems     @readonly,
             ExpenseApprovals @readonly,
         }
         actions {
