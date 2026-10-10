@@ -71,6 +71,11 @@ service ExpenseService {
             };
         };
 
+    function userInfo() returns {
+        @mandatory ID    : String;
+        @mandatory Roles : array of String;
+    }
+
     @readonly
     entity Employees        as
         projection on db.Employees {

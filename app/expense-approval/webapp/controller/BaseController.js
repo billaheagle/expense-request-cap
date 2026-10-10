@@ -78,6 +78,7 @@ sap.ui.define([
                 })
 
                 await oAction.execute();
+                return oAction.getBoundContext()?.getObject();
             }
         })
     }
