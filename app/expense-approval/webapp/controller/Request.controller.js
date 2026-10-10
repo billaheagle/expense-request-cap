@@ -128,7 +128,7 @@ sap.ui.define([
         try {
           const sID = await this._draft();
           await this._activate(sID);
-          MessageBox.success("Expense request saved as draft", {
+          MessageBox.success(this.getText("requestSuccessDraft"), {
             onClose: () => {
               this._clearForm();
               this.onPageCreateExpenseNavButtonPress();
@@ -144,7 +144,7 @@ sap.ui.define([
           const sID = await this._draft();
           await this._activate(sID);
           await this._submit(sID);
-          MessageBox.success("Expense request submitted successfully", {
+          MessageBox.success(this.getText("requestSuccessSubmit"), {
             onClose: () => {
               this._clearForm();
               this.onPageCreateExpenseNavButtonPress();
@@ -225,7 +225,7 @@ sap.ui.define([
         const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
-        MessageBox.confirm("Are you sure delete this row?", {
+        MessageBox.confirm(this.getText("requestConfirmDelete"), {
           actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
           emphasizedAction: MessageBox.Action.DELETE,
           onClose: (sAction) => {
@@ -299,7 +299,7 @@ sap.ui.define([
       onCurrencyInputValueHelpRequest() {
         if (!this._oCurrencyDialog) {
           this._oCurrencyDialog = new SelectDialog({
-            title: "Select Currency",
+            title: this.getText("titleSelectCurrency"),
             items: {
               path: "/Currencies",
               template: new StandardListItem({
@@ -331,13 +331,14 @@ sap.ui.define([
       onExpenseTypeCodeInputValueHelpRequest() {
         if (!this._oExpenseTypeDialog) {
           this._oExpenseTypeDialog = new SelectDialog({
-            title: "Select Expense Type",
+            title: this.getText("titleSelectExpenseTYpe"),
             items: {
               path: "masterData>/ExpenseTypes",
               template: new StandardListItem({
                 title: "{masterData>Description}", description: {
-                  path: "masterData>MaxAmount",
-                  formatter: (sMaxAmount) => Number(sMaxAmount) > 0 ? `Max ${sMaxAmount}` : `No Limit`
+                  parts: ["masterData>MaxAmount", "masterData>Currency_code"],
+                  formatter: (sMaxAmount, sCurrencyCode) => Number(sMaxAmount) > 0 ?
+                    this.getText("descriptionSelectExpenseType1", [sMaxAmount, sCurrencyCode]) : this.getText("descriptionSelectExpenseType2")
                 }
               })
             },

@@ -96,7 +96,7 @@ sap.ui.define(
               },
             }),
             endButton: new Button({
-              text: "Cancel",
+              text: this.getText("approvalBtnCancel"),
               press: () => {
                 this._oRejectDialog.close();
               },
