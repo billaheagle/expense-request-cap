@@ -60,10 +60,28 @@ sap.ui.define(
         }
       },
 
-      onButtonDeclinePress(oEvent) {
+      _validateDecline() {
+        const oDeclineModel = this.getModel("decline");
+        const oDecline = oDeclineModel.getData();
+
+        oDecline._ReasontState = (oDecline.Reason) ? "None" : "Error";
+        oDecline._isValid = Boolean(oDecline.Reason);
+
+        oDecline.refresh();
+      },
+
+      onReasonInputLiveChange() {
+        this._validateDecline();
+      },
+
+      onCancelButtonDeclineDialogPress() {
+        this._oDeclineDialog.close();
+      },
+
+      onDeclineButtonDeclineDialogPress(oEvent) {
         await this._loadDeclineDialog();
         const oDecline = {
-          reason: "",
+          Reason: "",
         }
 
         const oDeclineModel = new JSONModel(oDecline);

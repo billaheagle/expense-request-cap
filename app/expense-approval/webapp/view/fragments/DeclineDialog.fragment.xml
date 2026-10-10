@@ -42,10 +42,10 @@
                     <Button
                         id="idSaveDeclineDialogButton"
                         text="Decline"
-                        press=".onSaveButtonDeclineDialogPress"
+                        press=".onDeclineButtonDeclineDialogPress"
                         class="sapUiSmallMarginBegin"
                         type="Accept"
-                        enabled="{= ${item>/_isValid} === true }"
+                        enabled="{= ${decline>/_isValid} === true }"
                     />
                 </HBox>
             </VBox>
