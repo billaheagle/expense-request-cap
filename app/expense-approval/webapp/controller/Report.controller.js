@@ -24,7 +24,7 @@ sap.ui.define(
       },
 
       formatDate(sValue) {
-        return formatter.formatDate(sValue);
+        return formatter.formatDateTime(sValue);
       },
 
       formatStatusState(sStatus) {
