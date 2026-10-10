@@ -131,7 +131,7 @@
           "target": "approval"
         },
         {
-          "pattern": "requestDetail",
+          "pattern": "requestDetail/{ID}",
           "name": "requestDetail",
           "target": "requestDetail"
         }

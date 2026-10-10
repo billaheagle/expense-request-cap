@@ -83,7 +83,7 @@ sap.ui.define([
         return formatter.formatStatusState(sStatus);
       },
 
-      onApproveButtonPress(oEvent) {
+      async onApproveButtonPress(oEvent) {
         const oContext = oEvent.getSource().getBindingContext();
         if (!oContext) return;
 
@@ -124,7 +124,7 @@ sap.ui.define([
       },
 
       onCancelButtonDeclineDialogPress() {
-        this._clearForm();
+        this._clearDeclineForm();
         this._oDeclineDialog.close();
       },
 
@@ -138,7 +138,7 @@ sap.ui.define([
         this._oDeclineDialog.open();
       },
 
-      _clearForm() {
+      _clearDeclineForm() {
         const oDecline = this._getInitialDecline();
         const oDeclineModel = this.getModel("decline");
         oDeclineModel.setData(oDecline);
@@ -155,7 +155,7 @@ sap.ui.define([
         try {
           await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
           this._oDeclineDialog.close();
-          this._clearForm();
+          this._clearDeclineForm();
 
           MessageBox.success(this.getText("approvalSuccessDecline"), {
             onClose: () => {
@@ -168,7 +168,7 @@ sap.ui.define([
 
       },
 
-      onReimburseButtonPress() {
+      async onReimburseButtonPress() {
         const oContext = oEvent.getSource().getBindingContext();
         if (!oContext) return;
 
