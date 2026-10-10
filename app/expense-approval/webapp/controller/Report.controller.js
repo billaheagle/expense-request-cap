@@ -23,7 +23,7 @@ sap.ui.define(
         oBinding.filter(aFilters);
       },
 
-      formatDate(sValue) {
+      formatDateTime(sValue) {
         return formatter.formatDateTime(sValue);
       },
 

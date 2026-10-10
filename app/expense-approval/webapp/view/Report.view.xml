@@ -96,7 +96,7 @@
                             />
                             <Text
                                 id="idSubmissionDateText"
-                                text="{path: 'SubmissionDate', formatter: '.formatDate'}"
+                                text="{path: 'SubmissionDate', formatter: '.formatDateTime', targetType: 'any', type: 'sap.ui.model.odata.type.DateTimeOffset'}"
                             />
                             <Text
                                 id="idNotesText"
@@ -106,7 +106,7 @@
                                 id="idTotalAmountObjectNumber"
                                 number="{
                                     path: 'TotalAmount',
-                                    type: 'sap.ui.model.type.Decimal',
+                                    type: 'sap.ui.model.odata.type.Decimal',
                                     formatOptions: {
                                         minFractionDigits: 2,
                                         maxFractionDigits: 2

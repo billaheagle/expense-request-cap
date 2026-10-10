@@ -2,25 +2,19 @@ sap.ui.define(
   [
     "expenseapproval/controller/BaseController",
     "sap/m/MessageBox",
-    "sap/m/Dialog",
-    "sap/m/Button",
-    "sap/m/TextArea",
+    "sap/ui/model/json/JSONModel",
     "expenseapproval/model/formatter"
   ],
   /**
    * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
    * @param   {typeof import("sap/m/MessageBox").default} MessageBox
-   * @param   {typeof import("sap/m/Dialog").default} Dialog
-   * @param   {typeof import("sap/m/Button").default} Button
-   * @param   {typeof import("sap/m/TextArea").default} TextArea
+   * @param   {typeof import("sap/ui/model/json/JSONModel").default} JSONModel
    * @param   {typeof import("expenseapproval/model/formatter").default} formatter
    */
   (
     BaseController,
     MessageBox,
-    Dialog,
-    Button,
-    TextArea,
+    JSONModel,
     formatter
   ) => {
     "use strict";
@@ -58,7 +52,26 @@ sap.ui.define(
         }
       },
 
-      onButtonRejectPress(oEvent) {
+      async _loadDeclineDialog() {
+        if (!this._oDeclineDialog) {
+          this._oDeclineDialog = await this.loadFragment({
+            name: "expenseapproval.view.fragments.DeclineDialog"
+          });
+        }
+      },
+
+      onButtonDeclinePress(oEvent) {
+        await this._loadDeclineDialog();
+        const oDecline = {
+          reason: "",
+        }
+
+        const oDeclineModel = new JSONModel(oDecline);
+        this.setModel(oDeclineModel, 'decline');
+        this._oDeclineDialog.open();
+      },
+
+      /* onButtonRejectPress(oEvent) {
         const oContext = oEvent.getSource().getBindingContext();
         if (!oContext) return;
 
@@ -109,9 +122,9 @@ sap.ui.define(
         }
 
         this._oRejectDialog.open();
-      },
+      }, */
 
-      formatDate(sValue) {
+      formatDateTime(sValue) {
         return formatter.formatDateTime(sValue);
       },
     });

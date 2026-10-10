@@ -98,7 +98,7 @@
                             />
                             <Text
                                 id="idSubmissionDateApprovalText"
-                                text="{path: 'SubmissionDate', formatter: '.formatDate'}"
+                                text="{path: 'SubmissionDate', formatter: '.formatDateTime', targetType: 'any', type:'sap.ui.model.odata.type.DateTimeOffset'}"
                             />
                             <ObjectNumber
                                 id="idTotalAmountApprovalObjectNumber"
@@ -124,12 +124,12 @@
                                     tooltip="{i18n>approvalBtnApprove}"
                                 />
                                 <Button
-                                    id="idRejectButton"
+                                    id="idDeclineButton"
                                     icon="sap-icon://decline"
                                     type="Reject"
-                                    press=".onButtonRejectPress"
+                                    press=".onButtonDeclinePress"
                                     class="sapUiTinyMarginBegin"
-                                    tooltip="{i18n>approvalBtnReject}"
+                                    tooltip="{i18n>approvalBtnDecline}"
                                 />
                             </HBox>
                         </cells>

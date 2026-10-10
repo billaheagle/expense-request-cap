@@ -1,0 +1,54 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Dialog
+        id="idDeclineDialog"
+        title="Decline Reason"
+        class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
+    >
+        <content>
+            <VBox
+                id="idDeclineDialogVBox"
+                class="sapUiSmallMargin"
+            >
+                <Label
+                    id="idReasonLabel"
+                    text="Reason"
+                />
+                <Input
+                    id="idReasonInput"
+                    value="{decline>/Reason}"
+                    valueState="{decline>/_ReasontState}"
+                    valueStateText="Reason is required"
+                    valueLiveUpdate="true"
+                    liveChange=".onReasonInputLiveChange"
+                    width="100%"
+                    class="sapUiSmallMarginBottom"
+                    type="Text"
+                />
+
+                <HBox
+                    id="idDeclineDialogHBox"
+                    justifyContent="End"
+                    class="sapUiSmallMarginTop"
+                >
+                    <Button
+                        id="idCancelDeclineDialogButton"
+                        text="Cancel"
+                        press=".onCancelButtonDeclineDialogPress"
+                        type="Reject"
+                    />
+                    <Button
+                        id="idSaveDeclineDialogButton"
+                        text="Decline"
+                        press=".onSaveButtonDeclineDialogPress"
+                        class="sapUiSmallMarginBegin"
+                        type="Accept"
+                        enabled="{= ${item>/_isValid} === true }"
+                    />
+                </HBox>
+            </VBox>
+        </content>
+    </Dialog>
+</core:FragmentDefinition>

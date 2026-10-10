@@ -5,7 +5,6 @@ sap.ui.define([
 
         return {
             formatDate(sValue) {
-                console.log(sValue)
                 if (!sValue) return "";
                 sValue = sValue.slice(0, 10);
                 const [sYear, sMonth, sDay] = sValue.split("-");

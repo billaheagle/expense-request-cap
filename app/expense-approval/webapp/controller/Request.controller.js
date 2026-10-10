@@ -331,7 +331,7 @@ sap.ui.define([
       onExpenseTypeCodeInputValueHelpRequest() {
         if (!this._oExpenseTypeDialog) {
           this._oExpenseTypeDialog = new SelectDialog({
-            title: this.getText("titleSelectExpenseTYpe"),
+            title: this.getText("titleSelectExpenseType"),
             items: {
               path: "masterData>/ExpenseTypes",
               template: new StandardListItem({
