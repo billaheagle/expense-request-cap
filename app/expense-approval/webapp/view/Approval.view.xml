@@ -104,7 +104,7 @@
                                 id="idTotalAmountApprovalObjectNumber"
                                 number="{
                                     path: 'TotalAmount',
-                                    type: 'sap.ui.model.type.Decimal',
+                                    type: 'sap.ui.model.odata.type.Decimal',
                                     formatOptions: {
                                         minFractionDigits: 2,
                                         maxFractionDigits: 2

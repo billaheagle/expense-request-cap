@@ -20,7 +20,16 @@ sap.ui.define(
     "use strict";
 
     return BaseController.extend("expenseapproval.controller.Approval", {
-      onInit() { },
+      onInit() {
+        this.getRouter()
+          .getRoute("approval")
+          .attachPatternMatched(this._onRouteMatched, this);
+      },
+
+      _onRouteMatched() {
+        const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
+        oTable?.getBinding("items")?.refresh();
+      },
 
       _getInitialDecline() {
         return {
@@ -76,7 +85,7 @@ sap.ui.define(
         oDecline._ReasontState = (oDecline.Reason) ? "None" : "Error";
         oDecline._isValid = Boolean(oDecline.Reason);
 
-        oDecline.refresh();
+        oDeclineModel.refresh();
       },
 
       onReasonInputLiveChange() {
@@ -88,7 +97,7 @@ sap.ui.define(
       },
 
       async onButtonDeclinePress(oEvent) {
-        this._oDeclineContext.getSource().getBindingContext();
+        this._oDeclineContext = oEvent.getSource().getBindingContext();
         await this._loadDeclineDialog();
 
         const oDecline = this._getInitialDecline();
@@ -103,7 +112,7 @@ sap.ui.define(
         oDeclineModel.setData(oDecline);
       },
 
-      async onDeclineButtonDeclineDialogPress(oEvent) {
+      async onDeclineButtonDeclineDialogPress() {
         const oDeclineModel = this.getModel("decline")
         const oDecline = oDeclineModel.getData();
 
@@ -115,16 +124,18 @@ sap.ui.define(
           await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
           const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
           const oBinding = oTable.getBinding("items");
+          this._oDeclineDialog.close();
+          this._clearForm();
+
           MessageBox.success(this.getText("approvalSuccessDecline"), {
             onClose: () => {
-              this._clearForm();
-              this._oDeclineDialog.close();
               oBinding.refresh();
             }
           });
         } catch (oError) {
           this.showError(oError.message);
         }
+
       },
 
       formatDateTime(sValue) {

@@ -8,7 +8,16 @@ sap.ui.define(
     "use strict";
 
     return BaseController.extend("expenseapproval.controller.Report", {
-      onInit() { },
+      onInit() {
+        this.getRouter()
+          .getRoute("report")
+          .attachPatternMatched(this._onRouteMatched, this);
+      },
+
+      _onRouteMatched() {
+        const oTable = this.byId("idExpenseRequestsReportTable");
+        oTable?.getBinding("items")?.refresh();
+      },
 
       onPageReportExpenseNavButtonPress() {
         this.navTo("home");
