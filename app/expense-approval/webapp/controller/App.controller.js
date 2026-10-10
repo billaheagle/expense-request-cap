@@ -11,7 +11,7 @@ sap.ui.define(
     "use strict";
 
     return BaseController.extend("expenseapproval.controller.App", {
-      onInit() {
+      async onInit() {
         const oUser = {
           ID: "",
           Roles: []
@@ -21,7 +21,7 @@ sap.ui.define(
         this.setModel(oUserModel, "user");
 
         try {
-          oUserModel.setData(this._loadUserInfo());
+          oUserModel.setData(await this._loadUserInfo());
         } catch (error) {
           this.showError(error.message)
         }
