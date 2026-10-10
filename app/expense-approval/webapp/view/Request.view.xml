@@ -31,10 +31,10 @@
                             <Input
                                 id="idCurrencyInput"
                                 value="{header>/Currency}"
-                                placeholder="e.g., USD"
+                                placeholder="{i18n>placeholderCurrency}"
                                 width="15%"
                                 valueState="{header>/_CurrencyState}"
-                                valueStateText="{i18n>requestCurrecyValueState}"
+                                valueStateText="{i18n>valueStateCurrency}"
                                 valueLiveUpdate="true"
                                 liveChange=".onCurrencyInputLiveChange"
                                 showValueHelp="true"
@@ -47,10 +47,10 @@
                             />
                             <TextArea
                                 id="idExpenseNotesTextArea"
-                                placeholder="{i18n>requestPlaceholderExpenseDetail}"
+                                placeholder="{i18n>placeholderExpenseDetail}"
                                 value="{header>/ExpenseNotes}"
                                 valueState="{header>/_ExpenseNotesState}"
-                                valueStateText="{i18n>requestExpenseNotesValueState}"
+                                valueStateText="{i18n>valueStateExpenseNotes}"
                                 valueLiveUpdate="true"
                                 liveChange=".onExpenseNotesTextAreaLiveChange"
                                 rows="4"

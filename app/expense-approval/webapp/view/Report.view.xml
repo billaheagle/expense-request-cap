@@ -33,7 +33,7 @@
                         <SearchField
                             id="idReportSearchField"
                             width="30%"
-                            placeholder="{i18n>reportSearchPlaceholder}"
+                            placeholder="{i18n>placeholderSearchRequestNumberOrNotes}"
                             search=".onSearchFieldReportSearch"
                         />
                     </OverflowToolbar>

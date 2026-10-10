@@ -4,7 +4,7 @@
 >
     <Dialog
         id="idItemDialog"
-        title="{i18n>titlePopupExpenseItem}"
+        title="{i18n>popupExpenseItemTitle}"
         class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
     >
         <content>
@@ -14,7 +14,7 @@
             >
                 <Label
                     id="idExpenseTypeIDLabel"
-                    text="{i18n>labelExpenseTypeCode}"
+                    text="{i18n>labelExpenseType}"
                 />
                 <Input
                     id="idExpenseTypeCodeInput"
@@ -22,7 +22,7 @@
                     showValueHelp="true"
                     valueHelpRequest=".onExpenseTypeCodeInputValueHelpRequest"
                     valueState="{item>/_ExpenseType_CodeState}"
-                    valueStateText="{i18n>expenseTypeValueState}"
+                    valueStateText="{i18n>valueStateExpenseType}"
                     valueLiveUpdate="true"
                     liveChange=".onExpenseTypeCodeInputLiveChange"
                     width="100%"
@@ -39,7 +39,7 @@
                     valueFormat="yyyy-MM-dd"
                     displayFormat="dd/MM/yyyy"
                     valueState="{item>/_ExpenseDateState}"
-                    valueStateText="{i18n>expenseDateValueState}"
+                    valueStateText="{i18n>valueStateExpenseDate}"
                     change=".onExpenseDateDatePickerChange"
                     width="100%"
                     class="sapUiSmallMarginBottom"
@@ -53,7 +53,7 @@
                     id="idAmountInput"
                     value="{item>/Amount}"
                     valueState="{item>/_AmountState}"
-                    valueStateText="{i18n>amountValueState}"
+                    valueStateText="{i18n>valueStateAmount}"
                     valueLiveUpdate="true"
                     liveChange=".onAmountInputLiveChange"
                     width="100%"
@@ -67,7 +67,7 @@
                 />
                 <TextArea
                     id="idDescriptionTextArea"
-                    placeholder="{i18n>descriptionPlaceholder}"
+                    placeholder="{i18n>placeholderDescription}"
                     value="{item>/Description}"
                     valueLiveUpdate="true"
                     rows="4"

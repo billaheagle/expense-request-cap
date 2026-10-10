@@ -4,7 +4,7 @@
 >
     <Dialog
         id="idDeclineDialog"
-        title="{i18n>titlePopupDecline}"
+        title="{i18n>popupDeclineTitle}"
         class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
     >
         <content>
@@ -20,12 +20,13 @@
                     id="idReasonInput"
                     value="{decline>/Reason}"
                     valueState="{decline>/_ReasonState}"
-                    valueStateText="{i18n>reasonValueState}"
+                    valueStateText="{i18n>valueStateReason}"
                     valueLiveUpdate="true"
                     liveChange=".onReasonInputLiveChange"
                     width="100%"
                     class="sapUiSmallMarginBottom"
                     type="Text"
+                    placeholder="{i18n>placeholderReason}"
                 />
 
                 <HBox

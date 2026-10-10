@@ -299,7 +299,7 @@ sap.ui.define([
       onCurrencyInputValueHelpRequest() {
         if (!this._oCurrencyDialog) {
           this._oCurrencyDialog = new SelectDialog({
-            title: this.getText("titleSelectCurrency"),
+            title: this.getText("requestSelectCurrencyTitle"),
             items: {
               path: "/Currencies",
               template: new StandardListItem({
@@ -331,14 +331,14 @@ sap.ui.define([
       onExpenseTypeCodeInputValueHelpRequest() {
         if (!this._oExpenseTypeDialog) {
           this._oExpenseTypeDialog = new SelectDialog({
-            title: this.getText("titleSelectExpenseType"),
+            title: this.getText("requestSelectExpenseTypeTitle"),
             items: {
               path: "masterData>/ExpenseTypes",
               template: new StandardListItem({
                 title: "{masterData>Description}", description: {
                   parts: ["masterData>MaxAmount", "masterData>Currency_code"],
                   formatter: (sMaxAmount, sCurrencyCode) => Number(sMaxAmount) > 0 ?
-                    this.getText("descriptionSelectExpenseType1", [sMaxAmount, sCurrencyCode]) : this.getText("descriptionSelectExpenseType2")
+                    this.getText("requestDescriptionSelectExpenseType1", [sMaxAmount, sCurrencyCode]) : this.getText("requestDescriptionSelectExpenseType2")
                 }
               })
             },

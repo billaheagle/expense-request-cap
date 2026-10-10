@@ -38,7 +38,7 @@
                         <SearchField
                             id="idApprovalSearchField"
                             width="30%"
-                            placeholder="{i18n>approvalSearchPlaceholder}"
+                            placeholder="{i18n>placeholderSearchRequestNumberOrNotes}"
                             search=".onSearchFieldApprovalSearch"
                         />
                     </OverflowToolbar>
