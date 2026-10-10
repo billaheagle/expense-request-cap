@@ -20,14 +20,14 @@
                         descending: true
                     }
                 }"
-                noDataText="No expense requests found"
+                noDataText="{i18n>reportNoRequest}"
                 class="sapUiResponsiveMargin"
             >
                 <headerToolbar>
                     <OverflowToolbar id="idReportOverflowToolbar">
                         <Title
                             id="idRequestsReportToolbarTitle"
-                            text="Requests"
+                            text="{i18n>reportContentTitle}"
                         />
                         <ToolbarSpacer id="idReportToolbarSpacer" />
                         <SearchField
@@ -42,7 +42,7 @@
                     <Column id="idRequestNumberColumn">
                         <Text
                             id="idRequestNumberColumnText"
-                            text="{i18n>reportColRequestNumber}"
+                            text="{i18n>columnRequestNumber}"
                         />
                     </Column>
                     <Column
@@ -52,7 +52,7 @@
                     >
                         <Text
                             id="idSubmissionDateColumnText"
-                            text="{i18n>reportColSubmissionDate}"
+                            text="{i18n>columnSubmissionDate}"
                         />
                     </Column>
                     <Column
@@ -62,7 +62,7 @@
                     >
                         <Text
                             id="idNotesColumnText"
-                            text="{i18n>reportColNotes}"
+                            text="{i18n>columnNotes}"
                         />
                     </Column>
                     <Column
@@ -71,7 +71,7 @@
                     >
                         <Text
                             id="idTotalAmountColumnText"
-                            text="{i18n>reportColTotalAmount}"
+                            text="{i18n>columnTotalAmount}"
                         />
                     </Column>
                     <Column
@@ -80,7 +80,7 @@
                     >
                         <Text
                             id="idStatusColumnText"
-                            text="{i18n>reportColStatus}"
+                            text="{i18n>columnStatus}"
                         />
                     </Column>
                 </columns>

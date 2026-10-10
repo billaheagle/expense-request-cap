@@ -20,7 +20,7 @@ sap.ui.define(
       },
 
       onPageReportExpenseNavButtonPress() {
-        this.navTo("home");
+        this.onNavBack();
       },
 
       onSearchFieldReportSearch(oEvent) {

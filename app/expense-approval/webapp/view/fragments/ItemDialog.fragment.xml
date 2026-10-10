@@ -4,7 +4,7 @@
 >
     <Dialog
         id="idItemDialog"
-        title="Expense Item Details"
+        title="{i18n>titlePopupExpenseItem}"
         class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
     >
         <content>
@@ -14,7 +14,7 @@
             >
                 <Label
                     id="idExpenseTypeIDLabel"
-                    text="Expense Type ID"
+                    text="{i18n>labelExpenseTypeCode}"
                 />
                 <Input
                     id="idExpenseTypeCodeInput"
@@ -22,7 +22,7 @@
                     showValueHelp="true"
                     valueHelpRequest=".onExpenseTypeCodeInputValueHelpRequest"
                     valueState="{item>/_ExpenseType_CodeState}"
-                    valueStateText="Expense Type is required"
+                    valueStateText="{i18n>expenseTypeValueState}"
                     valueLiveUpdate="true"
                     liveChange=".onExpenseTypeCodeInputLiveChange"
                     width="100%"
@@ -31,7 +31,7 @@
 
                 <Label
                     id="idDateLabel"
-                    text="Date"
+                    text="{i18n>labelDate}"
                 />
                 <DatePicker
                     id="idExpenseDateDatePicker"
@@ -39,7 +39,7 @@
                     valueFormat="yyyy-MM-dd"
                     displayFormat="dd/MM/yyyy"
                     valueState="{item>/_ExpenseDateState}"
-                    valueStateText="ExpenseDate is required"
+                    valueStateText="{i18n>expenseDateValueState}"
                     change=".onExpenseDateDatePickerChange"
                     width="100%"
                     class="sapUiSmallMarginBottom"
@@ -47,13 +47,13 @@
 
                 <Label
                     id="idAmountLabel"
-                    text="Amount"
+                    text="{i18n>labelAmount}"
                 />
                 <Input
                     id="idAmountInput"
                     value="{item>/Amount}"
                     valueState="{item>/_AmountState}"
-                    valueStateText="Amount is required"
+                    valueStateText="{i18n>amountValueState}"
                     valueLiveUpdate="true"
                     liveChange=".onAmountInputLiveChange"
                     width="100%"
@@ -63,11 +63,11 @@
 
                 <Label
                     id="idDescriptionLabel"
-                    text="Description"
+                    text="{i18n>labelDescription}"
                 />
                 <TextArea
                     id="idDescriptionTextArea"
-                    placeholder="Enter expense details here..."
+                    placeholder="{i18n>descriptionPlaceholder}"
                     value="{item>/Description}"
                     valueLiveUpdate="true"
                     rows="4"
@@ -85,13 +85,13 @@
                 >
                     <Button
                         id="idCancelItemDialogButton"
-                        text="Cancel"
+                        text="{i18n>btnCancel}"
                         press=".onCancelButtonItemDialogPress"
-                        type="Reject"
+                        type="Default"
                     />
                     <Button
                         id="idSaveItemDialogButton"
-                        text="Save"
+                        text="{i18n>btnSave}"
                         press=".onSaveButtonItemDialogPress"
                         class="sapUiSmallMarginBegin"
                         type="Accept"

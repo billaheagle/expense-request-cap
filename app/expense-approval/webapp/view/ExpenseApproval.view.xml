@@ -6,7 +6,7 @@
 >
     <Page
         id="idExpenseApprovalPage"
-        title="{i18n>title}"
+        title="{i18n>homeTitle}"
     >
         <Panel id="idExpenseApprovalPanel">
             <content>
@@ -17,7 +17,7 @@
                 >
                     <GenericTile
                         id="idRequestGenericTile"
-                        header="Request Expense"
+                        header="{i18n>homeRequestExpenseTile}"
                         press=".onGenericTileRequestPress"
                     >
                         <tileContent>
@@ -25,7 +25,7 @@
                                 <content>
                                     <Text
                                         id="idRequestANewExpenseText"
-                                        text="Request a new expense"
+                                        text="{i18n>homeRequestExpenseTileContent}"
                                     />
                                 </content>
                             </TileContent>
@@ -34,7 +34,7 @@
 
                     <GenericTile
                         id="idReportGenericTile"
-                        header="Report Expenses"
+                        header="{i18n>homeReportExpenseTile}"
                         press=".onGenericTileReportPress"
                         class="sapUiSmallMarginBegin"
                     >
@@ -43,7 +43,7 @@
                                 <content>
                                     <Text
                                         id="idViewYourExpensesText"
-                                        text="View your expenses"
+                                        text="{i18n>homeReportExpenseTileContent}"
                                     />
                                 </content>
                             </TileContent>
@@ -52,7 +52,7 @@
 
                     <GenericTile
                         id="idApprovalGenericTile"
-                        header="Approval"
+                        header="{i18n>homeApprovalExpenseTile}"
                         press=".onGenericTileApprovalPress"
                         class="sapUiSmallMarginBegin"
                     >
@@ -61,7 +61,7 @@
                                 <content>
                                     <Text
                                         id="idViewYourApprovalsText"
-                                        text="View your approvals"
+                                        text="{i18n>homeApprovalExpenseTileContent}"
                                     />
                                 </content>
                             </TileContent>

@@ -38,7 +38,7 @@ sap.ui.define(
       },
 
       onPageApprovalExpenseNavButtonPress() {
-        this.navTo("home");
+        this.onNavBack();
       },
 
       onSearchFieldApprovalSearch(oEvent) {
@@ -82,7 +82,7 @@ sap.ui.define(
         const oDeclineModel = this.getModel("decline");
         const oDecline = oDeclineModel.getData();
 
-        oDecline._ReasontState = (oDecline.Reason) ? "None" : "Error";
+        oDecline._ReasonState = (oDecline.Reason) ? "None" : "Error";
         oDecline._isValid = Boolean(oDecline.Reason);
 
         oDeclineModel.refresh();
@@ -93,6 +93,7 @@ sap.ui.define(
       },
 
       onCancelButtonDeclineDialogPress() {
+        this._clearForm();
         this._oDeclineDialog.close();
       },
 

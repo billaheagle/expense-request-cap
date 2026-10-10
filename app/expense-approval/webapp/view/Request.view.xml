@@ -7,14 +7,14 @@
     <Shell id="idRequestShell">
         <Page
             id="idCreateExpensePage"
-            title="Create Expense"
+            title="{i18n>requestTitle}"
             showNavButton="true"
             navButtonPress=".onPageCreateExpenseNavButtonPress"
         >
             <content>
                 <Panel
                     id="idExpenseRequestPanel"
-                    headerText="Expense Request"
+                    headerText="{i18n>requestContentTitle}"
                     class="sapUiResponsiveMargin"
                     width="auto"
                     expanded="true"
@@ -26,7 +26,7 @@
                         <form:content>
                             <Label
                                 id="idCurrencyLabel"
-                                text="Currency"
+                                text="{i18n>labelCurrency}"
                             />
                             <Input
                                 id="idCurrencyInput"
@@ -34,7 +34,7 @@
                                 placeholder="e.g., USD"
                                 width="15%"
                                 valueState="{header>/_CurrencyState}"
-                                valueStateText="Currency is required"
+                                valueStateText="{i18n>requestCurrecyValueState}"
                                 valueLiveUpdate="true"
                                 liveChange=".onCurrencyInputLiveChange"
                                 showValueHelp="true"
@@ -43,14 +43,14 @@
 
                             <Label
                                 id="idExpenseNotesLabel"
-                                text="Expense Notes"
+                                text="{i18n>labelExpenseNotes}"
                             />
                             <TextArea
                                 id="idExpenseNotesTextArea"
-                                placeholder="Enter expense details here..."
+                                placeholder="{i18n>requestPlaceholderExpenseDetail}"
                                 value="{header>/ExpenseNotes}"
                                 valueState="{header>/_ExpenseNotesState}"
-                                valueStateText="Expense Notes is required"
+                                valueStateText="{i18n>requestExpenseNotesValueState}"
                                 valueLiveUpdate="true"
                                 liveChange=".onExpenseNotesTextAreaLiveChange"
                                 rows="4"
@@ -70,14 +70,14 @@
                     >
                         <Button
                             id="idSaveAsDraftButton"
-                            text="Save as Draft"
+                            text="{i18n>btnSaveAsDraft}"
                             press=".onSaveAsDraftButtonPress"
                             icon="sap-icon://save"
                             enabled="{= ${header>/_isValid} === true }"
                         />
                         <Button
                             id="idSubmitRequestButton"
-                            text="Submit Request"
+                            text="{i18n>btnSubmitRequest}"
                             press=".onSubmitRequestButtonPress"
                             class="sapUiSmallMarginBegin"
                             icon="sap-icon://action"
@@ -89,7 +89,7 @@
 
                 <Panel
                     id="idExpenseItemsPanel"
-                    headerText="Expense Items"
+                    headerText="{i18n>requestExpenseItemContentTitle}"
                     class="sapUiResponsiveMargin"
                     width="auto"
                     expanded="true"
@@ -104,7 +104,7 @@
                                 <ToolbarSpacer id="idItemsToolbarSpacer" />
                                 <Button
                                     id="idAddNewItemButton"
-                                    text="Add New Item"
+                                    text="{i18n>btnAddNewItem}"
                                     icon="sap-icon://add"
                                     press=".onAddNewItemButtonPress"
                                     type="Ghost"
@@ -116,25 +116,25 @@
                             <Column id="idTypeColumn">
                                 <Text
                                     id="idTypeColumnHeaderText"
-                                    text="Type"
+                                    text="{i18n>columnExpenseType}"
                                 />
                             </Column>
                             <Column id="idDateColumn">
                                 <Text
                                     id="idDateColumnHeaderText"
-                                    text="Date"
+                                    text="{i18n>columnDate}"
                                 />
                             </Column>
                             <Column id="idAmountColumn">
                                 <Text
                                     id="idAmountColumnHeaderText"
-                                    text="Amount"
+                                    text="{i18n>columnAmount}"
                                 />
                             </Column>
                             <Column id="idDescriptionColumn">
                                 <Text
                                     id="idDescriptionColumnHeaderText"
-                                    text="Description"
+                                    text="{i18n>columnDescription}"
                                 />
                             </Column>
                             <Column
@@ -143,7 +143,7 @@
                             >
                                 <Text
                                     id="idActionColumnHeaderText"
-                                    text="Action"
+                                    text="{i18n>columnAction}"
                                 />
                             </Column>
                         </columns>

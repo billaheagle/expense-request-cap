@@ -32,13 +32,13 @@
                     <OverflowToolbar id="idApprovalOverflowToolbar">
                         <Title
                             id="idPendingApprovalsRequestsApprovalToolbarTitle"
-                            text="Pending Approvals"
+                            text="{i18n>approvalContentTitle}"
                         />
                         <ToolbarSpacer id="idApprovalToolbarSpacer" />
                         <SearchField
                             id="idApprovalSearchField"
                             width="30%"
-                            placeholder="{i18n>reportSearchPlaceholder}"
+                            placeholder="{i18n>approvalSearchPlaceholder}"
                             search=".onSearchFieldApprovalSearch"
                         />
                     </OverflowToolbar>
@@ -47,13 +47,13 @@
                     <Column id="idRequestNumberApprovalColumn">
                         <Text
                             id="idRequestNumberApprovalColumnText"
-                            text="{i18n>reportColRequestNumber}"
+                            text="{i18n>columnRequestNumber}"
                         />
                     </Column>
                     <Column id="idEmployeeApprovalColumn">
                         <Text
                             id="idEmployeeApprovalColumnText"
-                            text="{i18n>approvalColEmployee}"
+                            text="{i18n>columnEmployee}"
                         />
                     </Column>
                     <Column
@@ -63,7 +63,7 @@
                     >
                         <Text
                             id="idSubmissionDateApprovalColumnText"
-                            text="{i18n>reportColSubmissionDate}"
+                            text="{i18n>columnSubmissionDate}"
                         />
                     </Column>
                     <Column
@@ -72,7 +72,7 @@
                     >
                         <Text
                             id="idTotalAmountApprovalColumnText"
-                            text="{i18n>reportColTotalAmount}"
+                            text="{i18n>columnTotalAmount}"
                         />
                     </Column>
                     <Column
@@ -81,7 +81,7 @@
                     >
                         <Text
                             id="idActionsApprovalColumnText"
-                            text="Actions"
+                            text="{i18n>columnAction}"
                         />
                     </Column>
                 </columns>
@@ -121,7 +121,7 @@
                                     icon="sap-icon://accept"
                                     type="Success"
                                     press=".onButtonApprovePress"
-                                    tooltip="{i18n>approvalBtnApprove}"
+                                    tooltip="{i18n>btnApprove}"
                                 />
                                 <Button
                                     id="idDeclineButton"
@@ -129,7 +129,7 @@
                                     type="Reject"
                                     press=".onButtonDeclinePress"
                                     class="sapUiTinyMarginBegin"
-                                    tooltip="{i18n>approvalBtnDecline}"
+                                    tooltip="{i18n>btnDecline}"
                                 />
                             </HBox>
                         </cells>

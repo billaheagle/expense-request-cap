@@ -4,7 +4,7 @@
 >
     <Dialog
         id="idDeclineDialog"
-        title="Decline Reason"
+        title="{i18n>titlePopupDecline}"
         class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
     >
         <content>
@@ -14,13 +14,13 @@
             >
                 <Label
                     id="idReasonLabel"
-                    text="Reason"
+                    text="{i18n>labelReason}"
                 />
                 <Input
                     id="idReasonInput"
                     value="{decline>/Reason}"
-                    valueState="{decline>/_ReasontState}"
-                    valueStateText="Reason is required"
+                    valueState="{decline>/_ReasonState}"
+                    valueStateText="{i18n>reasonValueState}"
                     valueLiveUpdate="true"
                     liveChange=".onReasonInputLiveChange"
                     width="100%"
@@ -35,16 +35,16 @@
                 >
                     <Button
                         id="idCancelDeclineDialogButton"
-                        text="Cancel"
+                        text="{i18n>btnCancel}"
                         press=".onCancelButtonDeclineDialogPress"
-                        type="Reject"
+                        type="Default"
                     />
                     <Button
                         id="idSaveDeclineDialogButton"
-                        text="Decline"
+                        text="{i18n>btnDecline}"
                         press=".onDeclineButtonDeclineDialogPress"
                         class="sapUiSmallMarginBegin"
-                        type="Accept"
+                        type="Reject"
                         enabled="{= ${decline>/_isValid} === true }"
                     />
                 </HBox>

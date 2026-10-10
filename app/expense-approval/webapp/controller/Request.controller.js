@@ -64,7 +64,7 @@ sap.ui.define([
       },
 
       onPageCreateExpenseNavButtonPress() {
-        this.navTo("home");
+        this.onNavBack();
       },
 
       _buildPayload() {
