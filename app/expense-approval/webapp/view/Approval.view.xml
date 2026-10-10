@@ -67,6 +67,16 @@
                         />
                     </Column>
                     <Column
+                        id="idNotesApprovalColumn"
+                        minScreenWidth="Desktop"
+                        demandPopin="true"
+                    >
+                        <Text
+                            id="idNotesApprovalColumnText"
+                            text="{i18n>columnNotes}"
+                        />
+                    </Column>
+                    <Column
                         id="idTotalAmountApprovalColumn"
                         hAlign="End"
                     >
@@ -99,6 +109,10 @@
                             <Text
                                 id="idSubmissionDateApprovalText"
                                 text="{path: 'SubmissionDate', formatter: '.formatDateTime', targetType: 'any', type:'sap.ui.model.odata.type.DateTimeOffset'}"
+                            />
+                            <Text
+                                id="idNotesApprovalText"
+                                text="{Notes}"
                             />
                             <ObjectNumber
                                 id="idTotalAmountApprovalObjectNumber"

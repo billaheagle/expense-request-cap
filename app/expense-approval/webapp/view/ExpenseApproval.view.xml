@@ -17,6 +17,7 @@
                 >
                     <GenericTile
                         id="idRequestGenericTile"
+                        visible="{= ${user>/Roles}.indexOf('employee') >= 0 }"
                         header="{i18n>homeRequestExpenseTile}"
                         press=".onGenericTileRequestPress"
                     >
@@ -52,6 +53,7 @@
 
                     <GenericTile
                         id="idApprovalGenericTile"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 }"
                         header="{i18n>homeApprovalExpenseTile}"
                         press=".onGenericTileApprovalPress"
                         class="sapUiSmallMarginBegin"

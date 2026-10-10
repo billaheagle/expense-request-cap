@@ -83,11 +83,21 @@
                             text="{i18n>columnStatus}"
                         />
                     </Column>
+                    <Column
+                        id="idActionsReportColumn"
+                        hAlign="End"
+                    >
+                        <Text
+                            id="idActionsReportColumnText"
+                            text="{i18n>columnAction}"
+                        />
+                    </Column>
                 </columns>
                 <items>
                     <ColumnListItem
                         id="idReportColumnListItem"
-                        type="Active"
+                        type="Navigation"
+                        press=".onReportItemPress"
                     >
                         <cells>
                             <ObjectIdentifier
@@ -119,6 +129,18 @@
                                 text="{Status}"
                                 state="{path: 'Status', formatter: '.formatStatusState'}"
                             />
+                            <HBox
+                                id="idReportActionsHBox"
+                                justifyContent="End"
+                            >
+                                <Button
+                                    id="idReimbrseButton"
+                                    icon="sap-icon://money-bills"
+                                    type="Accept"
+                                    press=".onButtonApprovePress"
+                                    tooltip="{i18n>btnReimburse}"
+                                />
+                            </HBox>
                         </cells>
                     </ColumnListItem>
                 </items>

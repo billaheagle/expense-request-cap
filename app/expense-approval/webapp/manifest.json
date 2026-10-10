@@ -129,6 +129,11 @@
           "pattern": "approval",
           "name": "approval",
           "target": "approval"
+        },
+        {
+          "pattern": "requestDetail",
+          "name": "requestDetail",
+          "target": "requestDetail"
         }
       ],
       "targets": {
@@ -147,6 +152,10 @@
         "approval": {
           "viewId": "idApproval",
           "viewName": "Approval"
+        },
+        "requestDetail": {
+          "viewId": "idRequestDetail",
+          "viewName": "RequestDetail"
         }
       }
     },

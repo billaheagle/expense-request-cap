@@ -39,5 +39,10 @@ sap.ui.define(
       formatStatusState(sStatus) {
         return formatter.formatStatusState(sStatus);
       },
+
+      onReportItemPress(oEvent) {
+        const oContext = oEvent.getSource().getBindingContext();
+        this.navTo("requestDetail", { ID: oContext.getProperty("ID") });
+      }
     });
   });

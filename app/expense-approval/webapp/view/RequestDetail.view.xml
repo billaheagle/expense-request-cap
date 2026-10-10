@@ -1,0 +1,165 @@
+<mvc:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:form="sap.ui.layout.form"
+    xmlns="sap.m"
+    controllerName="expenseapproval.controller.RequestDetail"
+>
+    <Page
+        id="idRequestDetailPage"
+        title="{i18n>requestDetailTitle}"
+        showNavButton="true"
+        navButtonPress=".onPageRequestDetailNavButtonPress"
+    >
+        <content>
+            <Panel
+                id="idRequestDetailHeaderPanel"
+                headerText="{i18n>requestContentTitle}"
+                class="sapUiResponsiveMargin"
+                width="auto"
+                expanded="true"
+            >
+                <form:SimpleForm
+                    id="idRequestDetailSimpleForm"
+                    editable="false"
+                >
+                    <form:content>
+                        <Label
+                            id="idDetailRequestNumberLabel"
+                            text="{i18n>labelRequestNumber}"
+                        />
+                        <Text
+                            id="idDetailRequestNumberText"
+                            text="{header>/RequestNumber}"
+                        />
+
+                        <Label
+                            id="idDetailStatusLabel"
+                            text="{i18n>labelStatus}"
+                        />
+                        <ObjectStatus
+                            id="idDetailStatusObjectStatus"
+                            text="{header>/Status}"
+                            state="{path: 'header>/Status', formatter: '.formatStatusState'}"
+                        />
+
+                        <Label
+                            id="idDetailCurrencyLabel"
+                            text="{i18n>labelCurrency}"
+                        />
+                        <Text
+                            id="idDetailCurrencyText"
+                            text="{header>/Currency}"
+                        />
+
+                        <Label
+                            id="idDetailExpenseNotesLabel"
+                            text="{i18n>labelExpenseNotes}"
+                        />
+                        <Text
+                            id="idDetailExpenseNotesText"
+                            text="{header>/ExpenseNotes}"
+                        />
+                    </form:content>
+                </form:SimpleForm>
+
+                <HBox
+                    id="idDetailActionButtonsHBox"
+                    justifyContent="End"
+                    class="sapUiSmallMarginTop"
+                >
+                    <Button
+                        id="idDetailApproveButton"
+                        text="{i18n>btnApprove}"
+                        press=".onApproveButtonPress"
+                        icon="sap-icon://save"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 }"
+                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 }"
+                    />
+                    <Button
+                        id="idDetailDeclineButton"
+                        text="{i18n>btnDecline}"
+                        press=".onDeclineButtonPress"
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://action"
+                        type="Emphasized"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 }"
+                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 }"
+                    />
+                    <Button
+                        id="idDetailReimburseButton"
+                        text="{i18n>btnReimburse}"
+                        press=".onReimburseButtonPress"
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://action"
+                        type="Emphasized"
+                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 }"
+                        enabled="{= ${user>/Roles}.indexOf('finance') >= 0 }"
+                    />
+                </HBox>
+            </Panel>
+
+            <Panel
+                id="idRequestDetailItemsPanel"
+                headerText="{i18n>requestExpenseItemContentTitle}"
+                class="sapUiResponsiveMargin"
+                width="auto"
+                expanded="true"
+            >
+                <Table
+                    id="idRequestDetailItemsTable"
+                    items="{items>/items}"
+                >
+                    <columns>
+                        <Column id="idDetailTypeColumn">
+                            <Text
+                                id="idDetailTypeColumnHeaderText"
+                                text="{i18n>columnExpenseType}"
+                            />
+                        </Column>
+                        <Column id="idDetailDateColumn">
+                            <Text
+                                id="idDetailDateColumnHeaderText"
+                                text="{i18n>columnDate}"
+                            />
+                        </Column>
+                        <Column id="idDetailAmountColumn">
+                            <Text
+                                id="idDetailAmountColumnHeaderText"
+                                text="{i18n>columnAmount}"
+                            />
+                        </Column>
+                        <Column id="idDetailDescriptionColumn">
+                            <Text
+                                id="idDetailDescriptionColumnHeaderText"
+                                text="{i18n>columnDescription}"
+                            />
+                        </Column>
+                    </columns>
+
+                    <items>
+                        <ColumnListItem id="idDetailItemsColumnListItem">
+                            <cells>
+                                <Text
+                                    id="idDetailExpenseTypeCodeText"
+                                    text="{items>ExpenseType_Code}"
+                                />
+                                <Text
+                                    id="idDetailExpenseDateText"
+                                    text="{path: 'items>ExpenseDate', formatter: '.formatDate'}"
+                                />
+                                <Text
+                                    id="idDetailAmountText"
+                                    text="{items>Amount}"
+                                />
+                                <Text
+                                    id="idDetailDescriptionText"
+                                    text="{items>Description}"
+                                />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </Panel>
+        </content>
+    </Page>
+</mvc:View>
