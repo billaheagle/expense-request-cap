@@ -62,7 +62,7 @@ service ExpenseService {
                 @mandatory Status : String;
             };
 
-            action decline(Comments: String) returns {
+            action decline(Reason: String) returns {
                 @mandatory Status : String;
             };
 

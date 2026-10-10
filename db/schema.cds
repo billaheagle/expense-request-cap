@@ -79,5 +79,5 @@ entity ExpenseApprovals : cuid, managed {
     Approver       : Association to Employees not null;
     Decision       : Decision not null @assert.range;
     DecisionDate   : DateTime not null;
-    Comments       : String(255);
+    Reason         : String(255);
 }

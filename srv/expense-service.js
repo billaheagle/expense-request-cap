@@ -93,8 +93,8 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (!expenseRequest) req.reject(404, 'Request not found');
 
       if (expenseRequest.Status !== 'Submitted') req.reject(409, `Only submitted requests can be ${decision.toLowerCase()}`);
-      const comments = req.data.Comments?.trim();
-      if (decision === 'Rejected' && !comments) req.reject(400, 'Reject must fill comments');
+      const reason = req.data.Reason?.trim();
+      if (decision === 'Rejected' && !reason) req.reject(400, 'Reject must fill reason');
 
       const employee = await getCurrentEmployee(req);
 
@@ -105,7 +105,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       await INSERT.into(ExpenseApprovals)
         .entries({
           ExpenseRequest_ID: ID, Approver_ID: employee.ID,
-          Decision: decision, DecisionDate: new Date(), Comments: comments
+          Decision: decision, DecisionDate: new Date(), Reason: reason
         })
 
       return { Status: decision };

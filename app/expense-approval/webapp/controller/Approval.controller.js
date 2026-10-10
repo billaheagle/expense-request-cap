@@ -22,6 +22,12 @@ sap.ui.define(
     return BaseController.extend("expenseapproval.controller.Approval", {
       onInit() { },
 
+      _getInitialDecline() {
+        return {
+          Reason: "",
+        }
+      },
+
       onPageApprovalExpenseNavButtonPress() {
         this.navTo("home");
       },
@@ -43,9 +49,12 @@ sap.ui.define(
           await this.executeAction("ExpenseService.approve(...)", oContext);
           const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
           const oBinding = oTable.getBinding("items");
-          oBinding.refresh();
           MessageBox.success(
-            this.getText("approvalSuccessApprove")
+            this.getText("approvalSuccessApprove"), {
+            onClose: () => {
+              oBinding.refresh();
+            }
+          }
           );
         } catch (oError) {
           this.showError(oError.message);
@@ -78,69 +87,45 @@ sap.ui.define(
         this._oDeclineDialog.close();
       },
 
-      onDeclineButtonDeclineDialogPress(oEvent) {
+      async onButtonDeclinePress(oEvent) {
+        this._oDeclineContext.getSource().getBindingContext();
         await this._loadDeclineDialog();
-        const oDecline = {
-          Reason: "",
-        }
 
+        const oDecline = this._getInitialDecline();
         const oDeclineModel = new JSONModel(oDecline);
         this.setModel(oDeclineModel, 'decline');
         this._oDeclineDialog.open();
       },
 
-      /* onButtonRejectPress(oEvent) {
-        const oContext = oEvent.getSource().getBindingContext();
-        if (!oContext) return;
+      _clearForm() {
+        const oDecline = this._getInitialDecline();
+        const oDeclineModel = this.getModel("decline");
+        oDeclineModel.setData(oDecline);
+      },
 
-        this._oSelectedContext = oContext;
+      async onDeclineButtonDeclineDialogPress(oEvent) {
+        const oDeclineModel = this.getModel("decline")
+        const oDecline = oDeclineModel.getData();
 
-        if (!this._oRejectDialog) {
-          this._oTextArea = new TextArea({
-            width: "100%",
-            placeholder: this.getText("approvalPlaceholderComment")
-          });
-
-          this._oRejectDialog = new Dialog({
-            title: this.getText("approvalBtnReject"),
-            type: "Message",
-            content: this._oTextArea,
-            beginButton: new Button({
-              type: "Emphasized",
-              text: this.getText("approvalBtnReject"),
-              press: async () => {
-                const sComment = this._oTextArea.getValue();
-                const mParams = {
-                  Comments: sComment
-                }
-
-                try {
-                  await this.executeAction("ExpenseService.decline(...)", this._oSelectedContext, mParams);
-                  const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
-                  const oBinding = oTable.getBinding("items");
-                  oBinding.refresh();
-                  this._oRejectDialog.close();
-                  MessageBox.success(this.getText("approvalSuccessReject"));
-                } catch (oError) {
-                  this.showError(oError.message);
-                }
-              },
-            }),
-            endButton: new Button({
-              text: this.getText("approvalBtnCancel"),
-              press: () => {
-                this._oRejectDialog.close();
-              },
-            }),
-            afterClose: () => {
-              this._oTextArea.setValue("");
-            },
-          });
-          this.addDependent(this._oRejectDialog);
+        const mParams = {
+          Reason: oDecline.Reason
         }
 
-        this._oRejectDialog.open();
-      }, */
+        try {
+          await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
+          const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
+          const oBinding = oTable.getBinding("items");
+          MessageBox.success(this.getText("approvalSuccessDecline"), {
+            onClose: () => {
+              this._clearForm();
+              this._oDeclineDialog.close();
+              oBinding.refresh();
+            }
+          });
+        } catch (oError) {
+          this.showError(oError.message);
+        }
+      },
 
       formatDateTime(sValue) {
         return formatter.formatDateTime(sValue);
