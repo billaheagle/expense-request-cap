@@ -59,7 +59,7 @@ sap.ui.define(
           const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
           const oBinding = oTable.getBinding("items");
           MessageBox.success(
-            this.getText("approvalSuccessApprove"), {
+            this.getText("messageSuccessApprove"), {
             onClose: () => {
               oBinding.refresh();
             }
@@ -128,7 +128,7 @@ sap.ui.define(
           this._oDeclineDialog.close();
           this._clearForm();
 
-          MessageBox.success(this.getText("approvalSuccessDecline"), {
+          MessageBox.success(this.getText("messageSuccessDecline"), {
             onClose: () => {
               oBinding.refresh();
             }

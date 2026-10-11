@@ -1,10 +1,15 @@
 sap.ui.define(
-  ["expenseapproval/controller/BaseController", "expenseapproval/model/formatter"],
+  [
+    "expenseapproval/controller/BaseController",
+    "expenseapproval/model/formatter",
+    "sap/m/MessageBox"
+  ],
   /**
    * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
    * @param   {typeof import("expenseapproval/model/formatter").default} formatter
+   * @param   {typeof import("sap/m/MessageBox").default} MessageBox
    */
-  function (BaseController, formatter) {
+  function (BaseController, formatter, MessageBox) {
     "use strict";
 
     return BaseController.extend("expenseapproval.controller.Report", {
@@ -43,6 +48,34 @@ sap.ui.define(
       onReportItemPress(oEvent) {
         const oContext = oEvent.getSource().getBindingContext();
         this.navTo("requestDetail", { ID: oContext.getProperty("ID") });
+      },
+
+      onButtonReimbursePress(oEvent) {
+
+      },
+
+      async onButtonDeletePress(oEvent) {
+        const oContext = oEvent.getSource().getBindingContext();
+        if (!oContext) return;
+
+        MessageBox.confirm(this.getText("messageConfirmDelete"), {
+          actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.DELETE,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.DELETE) return;
+            try {
+              await oContext.delete();
+
+              MessageBox.success(this.getText("messageSuccessDeleteDraft"), {
+                onClose: () => {
+                  this._onRouteMatched();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
+            }
+          },
+        });
       }
     });
   });

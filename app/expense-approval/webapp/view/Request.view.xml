@@ -73,6 +73,16 @@
                             text="{i18n>btnSaveAsDraft}"
                             press=".onSaveAsDraftButtonPress"
                             icon="sap-icon://save"
+                            visible="{= ${path: 'header>/ID', targetType: 'any'} === '' }"
+                            enabled="{= ${header>/_isValid} === true }"
+                        />
+                        <Button
+                            id="idUpdatetButton"
+                            text="{i18n>btnUpdateDraft}"
+                            press=".onUpdateDraftButtonPress"
+                            class="sapUiSmallMarginBegin"
+                            icon="sap-icon://edit"
+                            visible="{= ${path: 'header>/ID', targetType: 'any'} !== '' }"
                             enabled="{= ${header>/_isValid} === true }"
                         />
                         <Button

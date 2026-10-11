@@ -60,11 +60,61 @@ sap.ui.define([
         oItemsModel.setDefaultBindingMode(BindingMode.TwoWay);
         this.setModel(oItemsModel, "items");
 
+        this.getRouter()
+          .getRoute("request")
+          .attachPatternMatched(this._onRouteMatched, this);
+
         this._validateHeader();
       },
 
+      async _onRouteMatched(oEvent) {
+        this._sId = oEvent.getParameter("arguments").ID;
+
+        if (!this._sId) return;
+        this._clearForm();
+
+        try {
+          const oData = await this._loadRequest();
+          this._fillForm(oData);
+        } catch (oError) {
+          this.showError(oError.message);
+        }
+      },
+
+      _loadRequest() {
+        const oBinding = this.getModel().bindContext(
+          `/ExpenseRequests(ID=${this._sId},IsActiveEntity=true)`,
+          null,
+          { $expand: "ExpenseItems" },
+        );
+        return oBinding.requestObject();
+      },
+
       onPageCreateExpenseNavButtonPress() {
-        this.onNavBack();
+        if (!this._sId) this.onNavBack();
+
+        this.navTo("requestDetail", { ID: this._sId });
+      },
+
+      _fillForm(oData) {
+        this.getModel("header").setData({
+          ID: this._sId,
+          RequestNumber: oData.RequestNumber,
+          Currency: oData.Currency_code,
+          ExpenseNotes: oData.Notes,
+          Status: oData.Status,
+        });
+
+        this.getModel("items").setData({
+          items: (oData.ExpenseItems ?? []).map(oItem => ({
+            ExpenseType_Code: oItem.ExpenseType_Code,
+            ExpenseDate: oItem.ExpenseDate,
+            Amount: oItem.Amount,
+            Description: oItem.Description
+          }))
+        });
+
+        this._validateHeader();
       },
 
       _buildPayload() {
@@ -128,7 +178,7 @@ sap.ui.define([
         try {
           const sID = await this._draft();
           await this._activate(sID);
-          MessageBox.success(this.getText("requestSuccessDraft"), {
+          MessageBox.success(this.getText("messageSuccessDraft"), {
             onClose: () => {
               this._clearForm();
               this.onPageCreateExpenseNavButtonPress();
@@ -144,7 +194,7 @@ sap.ui.define([
           const sID = await this._draft();
           await this._activate(sID);
           await this._submit(sID);
-          MessageBox.success(this.getText("requestSuccessSubmit"), {
+          MessageBox.success(this.getText("messageSuccessSubmit"), {
             onClose: () => {
               this._clearForm();
               this.onPageCreateExpenseNavButtonPress();
@@ -225,7 +275,7 @@ sap.ui.define([
         const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
-        MessageBox.confirm(this.getText("requestConfirmDelete"), {
+        MessageBox.confirm(this.getText("messageConfirmDelete"), {
           actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
           emphasizedAction: MessageBox.Action.DELETE,
           onClose: (sAction) => {
@@ -359,6 +409,10 @@ sap.ui.define([
         }
 
         this._oExpenseTypeDialog.open();
+      },
+
+      onUpdateDraftButtonPress() {
+
       }
     });
   });

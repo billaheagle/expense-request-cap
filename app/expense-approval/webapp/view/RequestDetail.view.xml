@@ -26,20 +26,12 @@
                         <Label
                             id="idDetailRequestNumberLabel"
                             text="{i18n>labelRequestNumber}"
+                            visible="{= ${path: 'header>/Status', targetType: 'any'} !== 'Draft' }"
                         />
                         <Text
                             id="idDetailRequestNumberText"
                             text="{header>/RequestNumber}"
-                        />
-
-                        <Label
-                            id="idDetailStatusLabel"
-                            text="{i18n>labelStatus}"
-                        />
-                        <ObjectStatus
-                            id="idDetailStatusObjectStatus"
-                            text="{header>/Status}"
-                            state="{path: 'header>/Status', formatter: '.formatStatusState'}"
+                            visible="{= ${path: 'header>/Status', targetType: 'any'} !== 'Draft' }"
                         />
 
                         <Label
@@ -59,6 +51,27 @@
                             id="idDetailExpenseNotesText"
                             text="{header>/ExpenseNotes}"
                         />
+
+                        <Label
+                            id="idDetailStatusLabel"
+                            text="{i18n>labelStatus}"
+                        />
+                        <ObjectStatus
+                            id="idDetailStatusObjectStatus"
+                            text="{header>/Status}"
+                            state="{path: 'header>/Status', formatter: '.formatStatusState'}"
+                        />
+
+                        <Label
+                            id="idDetailReasonLabel"
+                            text="{i18n>labelReason}"
+                            visible="{= ${path: 'header>/Status', targetType: 'any'} === 'Rejected' }"
+                        />
+                        <Text
+                            id="idDetailReasonText"
+                            text="{header>/Reason}"
+                            visible="{= ${path: 'header>/Status', targetType: 'any'} === 'Rejected' }"
+                        />
                     </form:content>
                 </form:SimpleForm>
 
@@ -71,29 +84,50 @@
                         id="idDetailApproveButton"
                         text="{i18n>btnApprove}"
                         press=".onApproveButtonPress"
-                        icon="sap-icon://save"
-                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 }"
-                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 }"
+                        icon="sap-icon://accept"
+                        type="Success"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Submitted' }"
+                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Submitted' }"
                     />
                     <Button
                         id="idDetailDeclineButton"
                         text="{i18n>btnDecline}"
                         press=".onDeclineButtonPress"
                         class="sapUiSmallMarginBegin"
-                        icon="sap-icon://action"
-                        type="Emphasized"
-                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 }"
-                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 }"
+                        icon="sap-icon://decline"
+                        type="Reject"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Submitted' }"
+                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Submitted' }"
                     />
                     <Button
                         id="idDetailReimburseButton"
                         text="{i18n>btnReimburse}"
                         press=".onReimburseButtonPress"
                         class="sapUiSmallMarginBegin"
-                        icon="sap-icon://action"
+                        icon="sap-icon://money-bills"
+                        type="Accept"
+                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Approved' }"
+                        enabled="{= ${user>/Roles}.indexOf('finance') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Approved' }"
+                    />
+                    <Button
+                        id="idDetailEditButton"
+                        text="{i18n>btnEdit}"
+                        press=".onEditButtonPress"
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://edit"
                         type="Emphasized"
-                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 }"
-                        enabled="{= ${user>/Roles}.indexOf('finance') >= 0 }"
+                        visible="{= ${user>/Roles}.indexOf('employee') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Draft' }"
+                        enabled="{= ${user>/Roles}.indexOf('employee') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Draft' }"
+                    />
+                    <Button
+                        id="idDetailDeleteButton"
+                        text="{i18n>btnDelete}"
+                        press=".onDeleteButtonPress"
+                        class="sapUiSmallMarginBegin"
+                        icon="sap-icon://delete"
+                        type="Negative"
+                        visible="{= ${user>/Roles}.indexOf('employee') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Draft' }"
+                        enabled="{= ${user>/Roles}.indexOf('employee') >= 0 &amp;&amp; ${path: 'header>/Status', targetType: 'any'} === 'Draft' }"
                     />
                 </HBox>
             </Panel>

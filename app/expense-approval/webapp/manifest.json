@@ -116,7 +116,7 @@
           "target": "home"
         },
         {
-          "pattern": "request",
+          "pattern": "request/:ID:",
           "name": "request",
           "target": "request"
         },

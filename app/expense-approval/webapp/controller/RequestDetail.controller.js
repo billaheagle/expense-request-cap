@@ -1,14 +1,16 @@
 sap.ui.define([
   "expenseapproval/controller/BaseController",
   "sap/ui/model/json/JSONModel",
-  "expenseapproval/model/formatter"
+  "expenseapproval/model/formatter",
+  "sap/m/MessageBox"
 ],
   /**
    * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
    * @param   {typeof import("sap/ui/model/json/JSONModel").default} JSONModel
    * @param   {typeof import("expenseapproval/model/formatter").default} formatter
+   * @param   {typeof import("sap/m/MessageBox").default} MessageBox
    */
-  function (BaseController, JSONModel, formatter) {
+  function (BaseController, JSONModel, formatter, MessageBox) {
     "use strict";
 
     return BaseController.extend("expenseapproval.controller.RequestDetail", {
@@ -28,32 +30,38 @@ sap.ui.define([
       },
 
       async _onRouteMatched(oEvent) {
-        const sId = oEvent.getParameter("arguments").ID;
+        this._sId = oEvent.getParameter("arguments").ID;
         this._clearForm();
 
         try {
-          const oData = await this._loadRequest(sId);
+          const oData = await this._loadRequest();
           this._fillForm(oData);
         } catch (oError) {
           this.showError(oError.message);
         }
       },
 
-      _loadRequest(sId) {
+      _loadRequest() {
         const oBinding = this.getModel().bindContext(
-          `/ExpenseRequests(ID=${sId},IsActiveEntity=true)`,
+          `/ExpenseRequests(ID=${this._sId},IsActiveEntity=true)`,
           null,
-          { $expand: "ExpenseItems" }
+          { $expand: "ExpenseItems,ExpenseApprovals" },
         );
         return oBinding.requestObject();
       },
 
       _fillForm(oData) {
+        let sReason = '';
+        for (const oExpenseApproval of oData.ExpenseApprovals) {
+          if (oExpenseApproval.Decision === 'Rejected') sReason = oExpenseApproval.Reason;
+        }
+
         this.getModel("header").setData({
           RequestNumber: oData.RequestNumber,
-          Status: oData.Status,
           Currency: oData.Currency_code,
-          ExpenseNotes: oData.Notes
+          ExpenseNotes: oData.Notes,
+          Status: oData.Status,
+          Reason: sReason,
         });
 
         this.getModel("items").setData({
@@ -90,7 +98,7 @@ sap.ui.define([
         try {
           await this.executeAction("ExpenseService.approve(...)", oContext);
           MessageBox.success(
-            this.getText("approvalSuccessApprove"), {
+            this.getText("messageSuccessApprove"), {
             onClose: () => {
               this.onPageRequestDetailNavButtonPress();
             }
@@ -157,7 +165,7 @@ sap.ui.define([
           this._oDeclineDialog.close();
           this._clearDeclineForm();
 
-          MessageBox.success(this.getText("approvalSuccessDecline"), {
+          MessageBox.success(this.getText("messageSuccessDecline"), {
             onClose: () => {
               this.onPageRequestDetailNavButtonPress();
             }
@@ -175,7 +183,7 @@ sap.ui.define([
         try {
           await this.executeAction("ExpenseService.reimburse(...)", oContext);
           MessageBox.success(
-            this.getText("approvalSuccessReimburse"), {
+            this.getText("messageSuccessReimburse"), {
             onClose: () => {
               this.onPageRequestDetailNavButtonPress();
             }
@@ -184,6 +192,42 @@ sap.ui.define([
         } catch (oError) {
           this.showError(oError.message);
         }
+      },
+
+      onEditButtonPress() {
+        if (!this._sId) return;
+        this.navTo("request", { ID: this._sId });
+      },
+
+      async _deleteRequest() {
+        const oBinding = this.getModel().bindContext(
+          `/ExpenseRequests(ID=${this._sId},IsActiveEntity=true)`
+        );
+        await oBinding.requestObject();
+        await oBinding.getBoundContext().delete();
+      },
+
+      async onDeleteButtonPress(oEvent) {
+        if (!this._sId) return;
+
+        MessageBox.confirm(this.getText("messageConfirmDelete"), {
+          actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.DELETE,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.DELETE) return;
+            try {
+              await this._deleteRequest();
+
+              MessageBox.success(this.getText("messageSuccessDeleteDraft"), {
+                onClose: () => {
+                  this.onPageRequestDetailNavButtonPress();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
+            }
+          },
+        });
       }
     });
   }

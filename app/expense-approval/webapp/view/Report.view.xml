@@ -86,6 +86,7 @@
                     <Column
                         id="idActionsReportColumn"
                         hAlign="End"
+                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 || ${user>/Roles}.indexOf('employee') >= 0 }"
                     >
                         <Text
                             id="idActionsReportColumnText"
@@ -137,8 +138,18 @@
                                     id="idReimbrseButton"
                                     icon="sap-icon://money-bills"
                                     type="Accept"
-                                    press=".onButtonApprovePress"
+                                    press=".onButtonReimbursePress"
                                     tooltip="{i18n>btnReimburse}"
+                                    visible="{= ${user>/Roles}.indexOf('finance') >= 0 }"
+                                />
+                                <Button
+                                    id="idDeleteButton"
+                                    icon="sap-icon://delete"
+                                    type="Negative"
+                                    press=".onButtonDeletePress"
+                                    tooltip="{i18n>btnDelete}"
+                                    enabled="{= ${path: 'Status', targetType: 'any'} === 'Draft' }"
+                                    visible="{= ${user>/Roles}.indexOf('employee') >= 0 }"
                                 />
                             </HBox>
                         </cells>
