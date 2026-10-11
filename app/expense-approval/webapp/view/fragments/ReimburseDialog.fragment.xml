@@ -33,7 +33,7 @@
                     <ObjectNumber
                         id="idReimburseRequestedAmountObjectNumber"
                         number="{
-                            path: 'reimburse>/RequestedAmount',
+                            path: 'reimburse>/TotalRequestedAmount',
                             type: 'sap.ui.model.odata.type.Decimal',
                             formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 }
                         }"
@@ -54,7 +54,7 @@
                     <ObjectNumber
                         id="idReimburseMaxAmountObjectNumber"
                         number="{
-                            path: 'reimburse>/MaximumAmount',
+                            path: 'reimburse>/TotalAmount',
                             type: 'sap.ui.model.odata.type.Decimal',
                             formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 }
                         }"
@@ -79,14 +79,14 @@
 
                 <Label
                     id="idReimburseAmountLabel"
-                    text="{i18n>labelAcceptedAmount}"
+                    text="{i18n>labelTotalAcceptedAmount}"
                     labelFor="idReimburseAmountInput"
                 />
                 <Input
                     id="idReimburseAmountInput"
-                    value="{reimburse>/AcceptedAmount}"
-                    valueState="{reimburse>/_AcceptedAmountState}"
-                    valueStateText="{i18n>valueStateAcceptedAmount}"
+                    value="{reimburse>/TotalAcceptedAmount}"
+                    valueState="{reimburse>/_TotalAcceptedAmountState}"
+                    valueStateText="{i18n>valueStateTotalAcceptedAmount}"
                     valueLiveUpdate="true"
                     liveChange=".onAcceptedAmountInputLiveChange"
                     width="100%"
@@ -108,7 +108,7 @@
                     <Button
                         id="idSaveReimburseDialogButton"
                         text="{i18n>btnReimburse}"
-                        press=".onSaveButtonReimburseDialogPress"
+                        press=".onReimburseButtonReimburseDialogPress"
                         class="sapUiSmallMarginBegin"
                         type="Accept"
                         enabled="{= ${reimburse>/_isValid} === true }"

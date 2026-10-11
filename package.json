@@ -32,22 +32,28 @@
               "manager"
             ]
           },
-          "finance@company.com": {
-            "password": "123456",
-            "roles": [
-              "finance"
-            ]
-          },
           "employee@company.com": {
             "password": "123456",
             "roles": [
               "employee"
             ]
           },
-          "it@company.com": {
+          "finance@company.com": {
             "password": "123456",
             "roles": [
-              "*"
+              "finance"
+            ]
+          },
+          "manager2@company.com": {
+            "password": "123456",
+            "roles": [
+              "manager"
+            ]
+          },
+          "employee2@company.com": {
+            "password": "123456",
+            "roles": [
+              "employee"
             ]
           }
         }

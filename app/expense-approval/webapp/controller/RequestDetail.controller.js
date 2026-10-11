@@ -61,6 +61,7 @@ sap.ui.define([
           Currency: oData.Currency_code,
           ExpenseNotes: oData.Notes,
           Status: oData.Status,
+          TotalAmount: oData.TotalAmount,
           TotalRequestedAmount: oData.TotalRequestedAmount,
           TotalAcceptedAmount: oData.TotalAcceptedAmount,
           Reason: sReason,
@@ -167,10 +168,6 @@ sap.ui.define([
         const oDeclineModel = this.getModel("decline")
         const oDecline = oDeclineModel.getData();
 
-        const mParams = {
-          Reason: oDecline.Reason
-        }
-
         MessageBox.confirm(this.getText("messageConfirmDecline"), {
           actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
           emphasizedAction: MessageBox.Action.OK,
@@ -231,10 +228,10 @@ sap.ui.define([
 
       _getInitialReimburse() {
         return {
-          RequestedAmount: 0,
-          MaximumAmount: 0,
+          TotalRequestedAmount: 0,
+          TotalAmount: 0,
           Currency: "",
-          AcceptedAmount: 0,
+          TotalAcceptedAmount: 0,
           OverMaxItems: [
             {
               Description: "",
@@ -243,6 +240,44 @@ sap.ui.define([
               Justification: ""
             }
           ]
+        }
+      },
+
+      async _getDataReimburse() {
+        const oHeaderModel = this.getModel("header");
+        const oHeader = oHeaderModel.getData();
+
+        const oItemsModel = this.getModel("items");
+        const aItems = oItemsModel.getProperty("/items");
+
+        const aOverMaxItems = [];
+
+        const aContexts = await this.getModel("masterData")
+          .bindList("/ExpenseTypes")
+          .requestContexts();
+
+        const aExpenseTypes = aContexts.map(oContext => oContext.getObject());
+
+        aItems.forEach(item => {
+          const oExpenseType = aExpenseTypes.find(t => t.Code === item.ExpenseType_Code);
+          if (oExpenseType.MaxAmount && (Number(item.Amount) > Number(oExpenseType.MaxAmount))) {
+            aOverMaxItems.push({
+              ...{
+                Description: item.Description,
+                Amount: Number(item.Amount),
+                MaxAmount: Number(oExpenseType.MaxAmount),
+                Justification: item.Justification
+              }
+            });
+          }
+        })
+
+        return {
+          TotalRequestedAmount: oHeader.TotalRequestedAmount,
+          TotalAmount: oHeader.TotalAmount,
+          Currency: oHeader.Currency_code,
+          TotalAcceptedAmount: oHeader.TotalAmount,
+          OverMaxItems: aOverMaxItems
         }
       },
 
@@ -256,10 +291,10 @@ sap.ui.define([
 
       async onReimburseButtonPress() {
         await this._loadReimburseDialog();
-
-        const oReimburse = this._getInitialReimburse();
+        const oReimburse = await this._getDataReimburse();
         const oReimburseModel = new JSONModel(oReimburse);
         this.setModel(oReimburseModel, 'reimburse');
+        this._validateReimburse();
         this._oReimburseDialog.open();
       },
 
@@ -267,14 +302,14 @@ sap.ui.define([
         const oReimburseModel = this.getModel("reimburse");
         const oReimburse = oReimburseModel.getData();
 
-        const bAcceptedAmountOk = Number(oReimburse.AcceptedAmount) > 0;
-        oReimburse._AcceptedAmountState = (bAcceptedAmountOk) ? "None" : "Error";
+        const bAcceptedAmountOk = Number(oReimburse.TotalAcceptedAmount) > 0;
+        oReimburse._TotalAcceptedAmountState = (bAcceptedAmountOk) ? "None" : "Error";
         oReimburse._isValid = bAcceptedAmountOk;
 
         oReimburseModel.refresh();
       },
 
-      onReasonInputLiveChange() {
+      onAcceptedAmountInputLiveChange() {
         this._validateReimburse();
       },
 
@@ -292,13 +327,17 @@ sap.ui.define([
       async onReimburseButtonReimburseDialogPress() {
         if (!this._sId) return;
 
+        const oReimburseModel = this.getModel("reimburse");
+        const oReimburse = oReimburseModel.getData();
+
         MessageBox.confirm(this.getText("messageConfirmReimburse"), {
           actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
           emphasizedAction: MessageBox.Action.OK,
           onClose: async (sAction) => {
             if (sAction !== MessageBox.Action.OK) return;
             try {
-              await this.executeAction(this._actionPath("reimburse"));
+              console.log(oReimburse.TotalAcceptedAmount)
+              await this.executeAction(this._actionPath("reimburse"), undefined, { TotalAcceptedAmount: oReimburse.TotalAcceptedAmount });
 
               MessageBox.success(this.getText("messageSuccessReimburse"), {
                 onClose: () => {
@@ -310,7 +349,7 @@ sap.ui.define([
             }
           },
         });
-      }
+      },
     });
   }
 );

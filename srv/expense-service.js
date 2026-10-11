@@ -61,7 +61,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
       if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Edit`);
       req.data.Employee_ID = employee.ID;
-      
+
       const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, req.data.ExpenseItems);
       req.data.TotalAmount = nTotalAmount;
       req.data.TotalRequestedAmount = nTotalRequestedAmount;
@@ -129,9 +129,10 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (expenseRequest.Status !== 'Approved') req.reject(409, `Only approved requests can be reimbursed`);
 
       const employee = await getCurrentEmployee(req);
+      const totalAcceptedAmount = Number(req.data.TotalAcceptedAmount);
 
       await UPDATE(ExpenseRequests)
-        .set({ Status: 'Reimbursed', ReimbursedDate: new Date(), ReimbursedBy_ID: employee.ID })
+        .set({ Status: 'Reimbursed', ReimbursedDate: new Date(), ReimbursedBy_ID: employee.ID, TotalAcceptedAmount: totalAcceptedAmount })
         .where({ ID });
 
       return { Status: 'Reimbursed' };

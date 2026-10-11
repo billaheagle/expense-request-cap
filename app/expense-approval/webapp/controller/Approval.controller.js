@@ -120,6 +120,8 @@ sap.ui.define(
       },
 
       async onDeclineButtonDeclineDialogPress() {
+        if (!this._oDeclineContext) return;
+
         const oDeclineModel = this.getModel("decline")
         const oDecline = oDeclineModel.getData();
 
@@ -134,14 +136,12 @@ sap.ui.define(
             if (sAction !== MessageBox.Action.OK) return;
             try {
               await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
-              const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
-              const oBinding = oTable.getBinding("items");
               this._oDeclineDialog.close();
               this._clearForm();
 
               MessageBox.success(this.getText("messageSuccessDecline"), {
                 onClose: () => {
-                  oBinding.refresh();
+                  this._onRouteMatched();
                 }
               });
             } catch (oError) {

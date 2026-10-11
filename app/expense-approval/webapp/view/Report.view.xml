@@ -75,6 +75,15 @@
                         />
                     </Column>
                     <Column
+                        id="idTotalAmountColumn"
+                        hAlign="End"
+                    >
+                        <Text
+                            id="idTotalAmountColumnText"
+                            text="{i18n>columnTotalAmount}"
+                        />
+                    </Column>
+                    <Column
                         id="idTotalAcceptedAmountColumn"
                         hAlign="End"
                     >
@@ -126,6 +135,18 @@
                                 id="idTotalRequestedAmountObjectNumber"
                                 number="{
                                     path: 'TotalRequestedAmount',
+                                    type: 'sap.ui.model.odata.type.Decimal',
+                                    formatOptions: {
+                                        minFractionDigits: 2,
+                                        maxFractionDigits: 2
+                                    }
+                                }"
+                                unit="{Currency_code}"
+                            />
+                            <ObjectNumber
+                                id="idTotalAmountObjectNumber"
+                                number="{
+                                    path: 'TotalAmount',
                                     type: 'sap.ui.model.odata.type.Decimal',
                                     formatOptions: {
                                         minFractionDigits: 2,

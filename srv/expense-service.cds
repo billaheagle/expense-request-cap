@@ -43,31 +43,33 @@ service ExpenseService {
     entity ExpenseRequests  as
         projection on db.ExpenseRequests {
             *,
-            RequestNumber    @readonly,
-            Employee         @readonly,
-            Status           @readonly,
-            SubmissionDate   @readonly,
-            ApprovalDate     @readonly,
-            Approver         @readonly,
-            TotalAmount      @readonly,
-            ReimbursedDate   @readonly,
-            ReimbursedBy     @readonly,
-            ExpenseApprovals @readonly,
+            RequestNumber        @readonly,
+            Employee             @readonly,
+            Status               @readonly,
+            SubmissionDate       @readonly,
+            ApprovalDate         @readonly,
+            Approver             @readonly,
+            TotalAmount          @readonly,
+            TotalRequestedAmount @readonly,
+            TotalAcceptedAmount  @readonly,
+            ReimbursedDate       @readonly,
+            ReimbursedBy         @readonly,
+            ExpenseApprovals     @readonly,
         }
         actions {
-            action submit()                  returns {
+            action submit()                                       returns {
                 @mandatory Status : String;
             };
 
-            action approve()                 returns {
+            action approve()                                      returns {
                 @mandatory Status : String;
             };
 
-            action decline(Reason: String) returns {
+            action decline(Reason: String)                        returns {
                 @mandatory Status : String;
             };
 
-            action reimburse()               returns {
+            action reimburse(TotalAcceptedAmount: Decimal(15, 2)) returns {
                 @mandatory Status : String;
             };
         };
