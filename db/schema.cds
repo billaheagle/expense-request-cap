@@ -47,21 +47,23 @@ entity NumberRanges {
 
 @odata.draft.enabled
 entity ExpenseRequests : cuid, managed {
-    RequestNumber    : String(15);
-    Notes            : String(255) not null;
-    Employee         : Association to Employees not null;
-    Status           : Status default #Draft not null @assert.range;
-    SubmissionDate   : DateTime;
-    ApprovalDate     : DateTime;
-    Approver         : Association to Employees;
-    TotalAmount      : Decimal(15, 2) not null;
-    Currency         : Currency not null;
-    ReimbursedDate   : DateTime;
-    ReimbursedBy     : Association to Employees;
-    ExpenseItems     : Composition of many ExpenseItems
-                           on ExpenseItems.ExpenseRequest = $self;
-    ExpenseApprovals : Association to many ExpenseApprovals
-                           on ExpenseApprovals.ExpenseRequest = $self;
+    RequestNumber        : String(15);
+    Notes                : String(255) not null;
+    Employee             : Association to Employees not null;
+    Status               : Status default #Draft not null @assert.range;
+    SubmissionDate       : DateTime;
+    ApprovalDate         : DateTime;
+    Approver             : Association to Employees;
+    TotalAmount          : Decimal(15, 2) default 0 not null;
+    TotalRequestedAmount : Decimal(15, 2) default 0 not null;
+    TotalAcceptedAmount  : Decimal(15, 2) default 0 not null;
+    Currency             : Currency not null;
+    ReimbursedDate       : DateTime;
+    ReimbursedBy         : Association to Employees;
+    ExpenseItems         : Composition of many ExpenseItems
+                               on ExpenseItems.ExpenseRequest = $self;
+    ExpenseApprovals     : Association to many ExpenseApprovals
+                               on ExpenseApprovals.ExpenseRequest = $self;
 }
 
 entity ExpenseItems : cuid, managed {

@@ -46,6 +46,7 @@ sap.ui.define([
           ExpenseDate: `${sYear}-${sMonth}-${sDay}`,
           Amount: 0,
           Description: "",
+          Justification: ""
         }
       },
 
@@ -115,7 +116,8 @@ sap.ui.define([
             ExpenseType_Code: oItem.ExpenseType_Code,
             ExpenseDate: oItem.ExpenseDate,
             Amount: oItem.Amount,
-            Description: oItem.Description
+            Description: oItem.Description,
+            Justification: oItem.Justification
           }))
         });
 
@@ -141,7 +143,8 @@ sap.ui.define([
               ExpenseType_Code: oItem.ExpenseType_Code,
               ExpenseDate: oItem.ExpenseDate,
               Amount: oItem.Amount,
-              Description: oItem.Description
+              Description: oItem.Description,
+              Justification: oItem.Justification
             }
           )
         }
@@ -246,7 +249,8 @@ sap.ui.define([
               ExpenseType_Code: oItem.ExpenseType_Code,
               ExpenseDate: oItem.ExpenseDate,
               Amount: oItem.Amount,
-              Description: oItem.Description
+              Description: oItem.Description,
+              Justification: oItem.Justification
             }).created();
           }
 
@@ -292,7 +296,6 @@ sap.ui.define([
         const oItemModel = new JSONModel(oItem);
         this._oItemDialog.setModel(oItemModel, "item");
         this._sDialogMode = "new";
-        this._validateItem();
         this._oItemDialog.open();
       },
 
@@ -338,7 +341,7 @@ sap.ui.define([
         this._oItemDialog.setModel(oItemModel, "item");
         this._sDialogMode = "edit";
         this._iEditIndex = iIndex;
-        this._validateItem();
+        await this._validateItem();
         this._oItemDialog.open();
       },
 
@@ -385,7 +388,22 @@ sap.ui.define([
         oHeaderModel.refresh();
       },
 
-      _validateItem() {
+      async _getExpenseType(sCode) {
+        if (!sCode) return undefined;
+
+        if (!this._mExpenseTypes) {
+          const aContexts = await this.getModel("masterData")
+            .bindList("/ExpenseTypes")
+            .requestContexts();
+          this._mExpenseTypes = Object.fromEntries(
+            aContexts.map(oContext => [oContext.getProperty("Code"), oContext.getObject()])
+          );
+        }
+
+        return this._mExpenseTypes[sCode];
+      },
+
+      async _validateItem() {
         const oItemModel = this._oItemDialog.getModel("item");
         const oItem = oItemModel.getData();
 
@@ -394,7 +412,17 @@ sap.ui.define([
 
         const bAmountOk = Number(oItem.Amount) > 0;
         oItem._AmountState = (bAmountOk) ? "None" : "Error";
-        oItem._isValid = Boolean(oItem.ExpenseType_Code && oItem.ExpenseDate && bAmountOk);
+
+        const oType = await this._getExpenseType(oItem.ExpenseType_Code);
+        const bOverMax = Boolean(oType)
+          && Number(oType.MaxAmount) > 0
+          && Number(oItem.Amount) > Number(oType.MaxAmount);
+        oItem._JustificationState = (bOverMax && !oItem.Justification) ? "Error" : "None";
+
+
+        oItem._isValid = Boolean(oItem.ExpenseType_Code && oItem.ExpenseDate && bAmountOk
+          && !(bOverMax && !oItem.Justification)
+        );
 
         oItemModel.refresh();
       },
@@ -407,16 +435,20 @@ sap.ui.define([
         this._validateHeader();
       },
 
-      onExpenseTypeCodeInputLiveChange() {
-        this._validateItem();
+      async onExpenseTypeCodeInputLiveChange() {
+        await this._validateItem();
       },
 
-      onExpenseDateDatePickerChange() {
-        this._validateItem();
+      async onExpenseDateDatePickerChange() {
+        await this._validateItem();
       },
 
-      onAmountInputLiveChange() {
-        this._validateItem();
+      async onAmountInputLiveChange() {
+        await this._validateItem();
+      },
+
+      async onJustificationLiveChange() {
+        await this._validateItem();
       },
 
       onCurrencyInputValueHelpRequest() {
@@ -465,7 +497,7 @@ sap.ui.define([
                 }
               })
             },
-            confirm: (oEvent) => {
+            confirm: async (oEvent) => {
               const oSelectedItem = oEvent.getParameter("selectedItem");
               if (oSelectedItem) {
                 const sCode = oSelectedItem.getBindingContext("masterData").getProperty("Code");
@@ -473,7 +505,7 @@ sap.ui.define([
                 const oItemModel = this._oItemDialog.getModel("item");
                 oItemModel.setProperty("/ExpenseType_Code", sCode);
 
-                this._validateItem();
+                await this._validateItem();
               }
             }
           })

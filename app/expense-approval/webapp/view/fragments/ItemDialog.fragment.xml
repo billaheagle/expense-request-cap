@@ -78,6 +78,26 @@
                     showExceededText="true"
                 />
 
+                <Label
+                    id="idJustificationLabel"
+                    text="{i18n>labelJustification}"
+                />
+                <TextArea
+                    id="idJustificationTextArea"
+                    placeholder="{i18n>placeholderJustification}"
+                    value="{item>/Justification}"
+                    valueLiveUpdate="true"
+                    valueState="{item>/_JustificationState}"
+                    valueStateText="{i18n>valueStateJustification}"
+                    liveChange=".onJustificationLiveChange"
+                    rows="4"
+                    width="100%"
+                    growing="true"
+                    growingMaxLines="6"
+                    maxLength="255"
+                    showExceededText="true"
+                />
+
                 <HBox
                     id="idItemDialogHBox"
                     justifyContent="End"

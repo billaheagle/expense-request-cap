@@ -1,0 +1,120 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Dialog
+        id="idReimburseDialog"
+        title="{i18n>popupReimburseTitle}"
+        class="sapUiResponsivePadding--header sapUiResponsivePadding--content sapUiResponsivePadding--footer"
+    >
+        <content>
+            <VBox
+                id="idReimburseDialogVBox"
+                class="sapUiSmallMargin"
+            >
+                <MessageStrip
+                    id="idReimburseJustificationMessageStrip"
+                    text="{i18n>messageReviewJustification}"
+                    type="Information"
+                    showIcon="true"
+                    visible="{= ${reimburse>/OverMaxItems}.length > 0 }"
+                    class="sapUiSmallMarginBottom"
+                />
+
+                <HBox
+                    id="idReimburseRequestedAmountHBox"
+                    alignItems="Center"
+                >
+                    <Label
+                        id="idReimburseRequestedAmountLabel"
+                        text="{i18n>labelTotalRequestedAmount}"
+                        width="11rem"
+                    />
+                    <ObjectNumber
+                        id="idReimburseRequestedAmountObjectNumber"
+                        number="{
+                            path: 'reimburse>/RequestedAmount',
+                            type: 'sap.ui.model.odata.type.Decimal',
+                            formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 }
+                        }"
+                        unit="{reimburse>/Currency}"
+                    />
+                </HBox>
+
+                <HBox
+                    id="idReimburseMaxAmountHBox"
+                    alignItems="Center"
+                    class="sapUiTinyMarginBottom"
+                >
+                    <Label
+                        id="idReimburseMaxAmountLabel"
+                        text="{i18n>labelTotalMaximumAmount}"
+                        width="11rem"
+                    />
+                    <ObjectNumber
+                        id="idReimburseMaxAmountObjectNumber"
+                        number="{
+                            path: 'reimburse>/MaximumAmount',
+                            type: 'sap.ui.model.odata.type.Decimal',
+                            formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 }
+                        }"
+                        unit="{reimburse>/Currency}"
+                    />
+                </HBox>
+
+                <List
+                    id="idReimburseOverMaxItemsList"
+                    headerText="{i18n>popupReimburseOverMaxItemsHeader}"
+                    items="{reimburse>/OverMaxItems}"
+                    visible="{= ${reimburse>/OverMaxItems}.length > 0 }"
+                    class="sapUiSmallMarginBottom"
+                >
+                    <StandardListItem
+                        id="idReimburseOverMaxItemsListItem"
+                        title="{reimburse>Description}: {reimburse>Amount} / {reimburse>MaxAmount}"
+                        description="{reimburse>Justification}"
+                        wrapping="true"
+                    />
+                </List>
+
+                <Label
+                    id="idReimburseAmountLabel"
+                    text="{i18n>labelAcceptedAmount}"
+                    labelFor="idReimburseAmountInput"
+                />
+                <Input
+                    id="idReimburseAmountInput"
+                    value="{reimburse>/AcceptedAmount}"
+                    valueState="{reimburse>/_AcceptedAmountState}"
+                    valueStateText="{i18n>valueStateAcceptedAmount}"
+                    valueLiveUpdate="true"
+                    liveChange=".onAcceptedAmountInputLiveChange"
+                    width="100%"
+                    class="sapUiSmallMarginBottom"
+                    type="Number"
+                />
+
+                <HBox
+                    id="idReimburseDialogHBox"
+                    justifyContent="End"
+                    class="sapUiSmallMarginTop"
+                >
+                    <Button
+                        id="idCancelReimburseDialogButton"
+                        text="{i18n>btnCancel}"
+                        press=".onCancelButtonReimburseDialogPress"
+                        type="Default"
+                    />
+                    <Button
+                        id="idSaveReimburseDialogButton"
+                        text="{i18n>btnReimburse}"
+                        press=".onSaveButtonReimburseDialogPress"
+                        class="sapUiSmallMarginBegin"
+                        type="Accept"
+                        enabled="{= ${reimburse>/_isValid} === true }"
+                    />
+                </HBox>
+            </VBox>
+        </content>
+    </Dialog>
+</core:FragmentDefinition>

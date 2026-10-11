@@ -53,6 +53,42 @@
                         />
 
                         <Label
+                            id="idDetailTotalRequestedAmountLabel"
+                            text="{i18n>labelTotalRequestedAmount}"
+                        />
+                        <ObjectNumber
+                            id="idDetailTotalRequestedAmountObjectNumber"
+                            number="{
+                                path: 'header>/TotalRequestedAmount',
+                                type: 'sap.ui.model.odata.type.Decimal',
+                                formatOptions: {
+                                    minFractionDigits: 2,
+                                    maxFractionDigits: 2
+                                }
+                            }"
+                            unit="{header>/Currency}"
+                        />
+
+                        <Label
+                            id="idDetailTotalAcceptedAmountLabel"
+                            text="{i18n>labelTotalAcceptedAmount}"
+                            visible="{= ${path: 'Status', targetType: 'any'} === 'Reimbursed' }"
+                        />
+                        <ObjectNumber
+                            id="idDetailTotalAcceptedAmountObjectNumber"
+                            number="{
+                                path: 'header>/TotalAcceptedAmount',
+                                type: 'sap.ui.model.odata.type.Decimal',
+                                formatOptions: {
+                                    minFractionDigits: 2,
+                                    maxFractionDigits: 2
+                                }
+                            }"
+                            unit="{header>/Currency}"
+                            visible="{= ${path: 'Status', targetType: 'any'} === 'Reimbursed' }"
+                        />
+
+                        <Label
                             id="idDetailStatusLabel"
                             text="{i18n>labelStatus}"
                         />
@@ -168,6 +204,12 @@
                                 text="{i18n>columnDescription}"
                             />
                         </Column>
+                        <Column id="idDetailJustificationColumn">
+                            <Text
+                                id="idDetailJustificationColumnHeaderText"
+                                text="{i18n>columnJustification}"
+                            />
+                        </Column>
                     </columns>
 
                     <items>
@@ -188,6 +230,10 @@
                                 <Text
                                     id="idDetailDescriptionText"
                                     text="{items>Description}"
+                                />
+                                <Text
+                                    id="idDetailJustificationText"
+                                    text="{items>Justification}"
                                 />
                             </cells>
                         </ColumnListItem>

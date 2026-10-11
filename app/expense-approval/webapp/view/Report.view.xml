@@ -66,12 +66,21 @@
                         />
                     </Column>
                     <Column
-                        id="idTotalAmountColumn"
+                        id="idTotalRequestedAmountColumn"
                         hAlign="End"
                     >
                         <Text
-                            id="idTotalAmountColumnText"
-                            text="{i18n>columnTotalAmount}"
+                            id="idTotalRequestedAmountColumnText"
+                            text="{i18n>columnTotalRequestedAmount}"
+                        />
+                    </Column>
+                    <Column
+                        id="idTotalAcceptedAmountColumn"
+                        hAlign="End"
+                    >
+                        <Text
+                            id="idTotalAcceptedAmountColumnText"
+                            text="{i18n>columnTotalAcceptedAmount}"
                         />
                     </Column>
                     <Column
@@ -114,9 +123,9 @@
                                 text="{Notes}"
                             />
                             <ObjectNumber
-                                id="idTotalAmountObjectNumber"
+                                id="idTotalRequestedAmountObjectNumber"
                                 number="{
-                                    path: 'TotalAmount',
+                                    path: 'TotalRequestedAmount',
                                     type: 'sap.ui.model.odata.type.Decimal',
                                     formatOptions: {
                                         minFractionDigits: 2,
@@ -124,6 +133,19 @@
                                     }
                                 }"
                                 unit="{Currency_code}"
+                            />
+                            <ObjectNumber
+                                id="idTotalAcceptedAmountObjectNumber"
+                                number="{
+                                    path: 'TotalAcceptedAmount',
+                                    type: 'sap.ui.model.odata.type.Decimal',
+                                    formatOptions: {
+                                        minFractionDigits: 2,
+                                        maxFractionDigits: 2
+                                    }
+                                }"
+                                unit="{Currency_code}"
+                                visible="{= ${path: 'Status', targetType: 'any'} === 'Reimbursed' }"
                             />
                             <ObjectStatus
                                 id="idStatusObjectStatus"

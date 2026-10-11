@@ -127,21 +127,28 @@ sap.ui.define(
           Reason: oDecline.Reason
         }
 
-        try {
-          await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
-          const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
-          const oBinding = oTable.getBinding("items");
-          this._oDeclineDialog.close();
-          this._clearForm();
+        MessageBox.confirm(this.getText("messageConfirmDecline"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
+              const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
+              const oBinding = oTable.getBinding("items");
+              this._oDeclineDialog.close();
+              this._clearForm();
 
-          MessageBox.success(this.getText("messageSuccessDecline"), {
-            onClose: () => {
-              oBinding.refresh();
+              MessageBox.success(this.getText("messageSuccessDecline"), {
+                onClose: () => {
+                  oBinding.refresh();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
             }
-          });
-        } catch (oError) {
-          this.showError(oError.message);
-        }
+          },
+        });
 
       },
 

@@ -61,6 +61,8 @@ sap.ui.define([
           Currency: oData.Currency_code,
           ExpenseNotes: oData.Notes,
           Status: oData.Status,
+          TotalRequestedAmount: oData.TotalRequestedAmount,
+          TotalAcceptedAmount: oData.TotalAcceptedAmount,
           Reason: sReason,
         });
 
@@ -69,7 +71,8 @@ sap.ui.define([
             ExpenseType_Code: oItem.ExpenseType_Code,
             ExpenseDate: oItem.ExpenseDate,
             Amount: oItem.Amount,
-            Description: oItem.Description
+            Description: oItem.Description,
+            Justification: oItem.Justification
           }))
         });
       },
@@ -188,30 +191,6 @@ sap.ui.define([
             }
           },
         });
-
-      },
-
-      async onReimburseButtonPress() {
-        if (!this._sId) return;
-
-        MessageBox.confirm(this.getText("messageConfirmReimburse"), {
-          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.OK,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.OK) return;
-            try {
-              await this.executeAction(this._actionPath("reimburse"));
-
-              MessageBox.success(this.getText("messageSuccessReimburse"), {
-                onClose: () => {
-                  this.onPageRequestDetailNavButtonPress();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
-          },
-        });
       },
 
       onEditButtonPress() {
@@ -239,6 +218,89 @@ sap.ui.define([
               await this._deleteRequest();
 
               MessageBox.success(this.getText("messageSuccessDeleteDraft"), {
+                onClose: () => {
+                  this.onPageRequestDetailNavButtonPress();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
+            }
+          },
+        });
+      },
+
+      _getInitialReimburse() {
+        return {
+          RequestedAmount: 0,
+          MaximumAmount: 0,
+          Currency: "",
+          AcceptedAmount: 0,
+          OverMaxItems: [
+            {
+              Description: "",
+              Amount: 0,
+              MaxAmount: 0,
+              Justification: ""
+            }
+          ]
+        }
+      },
+
+      async _loadReimburseDialog() {
+        if (!this._oReimburseDialog) {
+          this._oReimburseDialog = await this.loadFragment({
+            name: "expenseapproval.view.fragments.ReimburseDialog"
+          });
+        }
+      },
+
+      async onReimburseButtonPress() {
+        await this._loadReimburseDialog();
+
+        const oReimburse = this._getInitialReimburse();
+        const oReimburseModel = new JSONModel(oReimburse);
+        this.setModel(oReimburseModel, 'reimburse');
+        this._oReimburseDialog.open();
+      },
+
+      _validateReimburse() {
+        const oReimburseModel = this.getModel("reimburse");
+        const oReimburse = oReimburseModel.getData();
+
+        const bAcceptedAmountOk = Number(oReimburse.AcceptedAmount) > 0;
+        oReimburse._AcceptedAmountState = (bAcceptedAmountOk) ? "None" : "Error";
+        oReimburse._isValid = bAcceptedAmountOk;
+
+        oReimburseModel.refresh();
+      },
+
+      onReasonInputLiveChange() {
+        this._validateReimburse();
+      },
+
+      onCancelButtonReimburseDialogPress() {
+        this._clearReimburseForm();
+        this._oReimburseDialog.close();
+      },
+
+      _clearReimburseForm() {
+        const oReimburse = this._getInitialReimburse();
+        const oReimburseModel = this.getModel("reimburse");
+        oReimburseModel.setData(oReimburse);
+      },
+
+      async onReimburseButtonReimburseDialogPress() {
+        if (!this._sId) return;
+
+        MessageBox.confirm(this.getText("messageConfirmReimburse"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction(this._actionPath("reimburse"));
+
+              MessageBox.success(this.getText("messageSuccessReimburse"), {
                 onClose: () => {
                   this.onPageRequestDetailNavButtonPress();
                 }

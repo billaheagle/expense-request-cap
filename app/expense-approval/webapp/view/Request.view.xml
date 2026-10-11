@@ -137,6 +137,12 @@
                                     text="{i18n>columnDescription}"
                                 />
                             </Column>
+                            <Column id="idJustificationColumn">
+                                <Text
+                                    id="idJustificationColumnHeaderText"
+                                    text="{i18n>columnJustification}"
+                                />
+                            </Column>
                             <Column
                                 id="idActionColumn"
                                 hAlign="Center"
@@ -166,6 +172,10 @@
                                     <Text
                                         id="idDescriptionText"
                                         text="{items>Description}"
+                                    />
+                                    <Text
+                                        id="idJustificationText"
+                                        text="{items>Justification}"
                                     />
 
                                     <HBox

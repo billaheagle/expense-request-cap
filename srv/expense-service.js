@@ -14,8 +14,9 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     this.on("userInfo", req => ({ ID: req.user.id, Roles: Object.keys(req.user.roles) }));
 
     async function sumItems(req, items) {
-      let result = 0;
-      if (!Array.isArray(items)) return result;
+      let nTotalAmount = 0;
+      let nTotalRequestedAmount = 0;
+      if (!Array.isArray(items)) return { nTotalAmount, nTotalRequestedAmount };
 
       const aCodes = items.map(i => i.ExpenseType_Code);
       const aExpenseTypes = await SELECT.from(ExpenseTypes).where({ Code: { "IN": aCodes }, Active: true });
@@ -23,11 +24,12 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       for (const item of items) {
         const oExpenseType = aExpenseTypes.find(t => t.Code === item.ExpenseType_Code);
         if (!oExpenseType) req.reject(400, `Invalid Expense Type ${item.ExpenseType_Code}`);
-        result += (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount))
+        nTotalAmount += (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount))
           ? Number(oExpenseType.MaxAmount) : Number(item.Amount);
+        nTotalRequestedAmount += Number(item.Amount);
       }
 
-      return result;
+      return { nTotalAmount, nTotalRequestedAmount };
     }
 
     async function getNextRequestNumber(req) {
@@ -43,7 +45,9 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const employee = await getCurrentEmployee(req);
       req.data.Employee_ID = employee.ID;
 
-      req.data.TotalAmount = await sumItems(req, req.data.ExpenseItems);
+      const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, req.data.ExpenseItems);
+      req.data.TotalAmount = nTotalAmount;
+      req.data.TotalRequestedAmount = nTotalRequestedAmount;
       req.data.Status = 'Draft';
     });
 
@@ -57,8 +61,10 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
       if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Edit`);
       req.data.Employee_ID = employee.ID;
-
-      req.data.TotalAmount = await sumItems(req, req.data.ExpenseItems);
+      
+      const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, req.data.ExpenseItems);
+      req.data.TotalAmount = nTotalAmount;
+      req.data.TotalRequestedAmount = nTotalRequestedAmount;
       req.data.Status = 'Draft';
     });
 
@@ -76,11 +82,11 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
       const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: expenseRequest.ID });
       if (expenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
-      const totalAmount = await sumItems(req, expenseItems);
+      const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, expenseItems);
       const requestNumber = await getNextRequestNumber(req);
 
       await UPDATE(ExpenseRequests)
-        .set({ Status: 'Submitted', SubmissionDate: new Date(), TotalAmount: totalAmount, RequestNumber: requestNumber })
+        .set({ Status: 'Submitted', SubmissionDate: new Date(), TotalAmount: nTotalAmount, TotalRequestedAmount: nTotalRequestedAmount, RequestNumber: requestNumber })
         .where({ ID });
 
       return { Status: 'Submitted' };
