@@ -51,7 +51,27 @@ sap.ui.define(
       },
 
       onButtonReimbursePress(oEvent) {
+        const oContext = oEvent.getSource().getBindingContext();
+        if (!oContext) return;
 
+        MessageBox.confirm(this.getText("messageConfirmReimburse"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction("ExpenseService.reimburse(...)", oContext);
+
+              MessageBox.success(this.getText("messageSuccessReimburse"), {
+                onClose: () => {
+                  this._onRouteMatched();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
+            }
+          },
+        });
       },
 
       async onButtonDeletePress(oEvent) {

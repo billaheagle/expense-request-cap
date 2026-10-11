@@ -54,20 +54,26 @@ sap.ui.define(
         const oContext = oEvent.getSource().getBindingContext();
         if (!oContext) return;
 
-        try {
-          await this.executeAction("ExpenseService.approve(...)", oContext);
-          const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
-          const oBinding = oTable.getBinding("items");
-          MessageBox.success(
-            this.getText("messageSuccessApprove"), {
-            onClose: () => {
-              oBinding.refresh();
+        MessageBox.confirm(this.getText("messageConfirmApprove"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction("ExpenseService.approve(...)", oContext);
+              const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
+              const oBinding = oTable.getBinding("items");
+
+              MessageBox.success(this.getText("messageSuccessApprove"), {
+                onClose: () => {
+                  oBinding.refresh();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
             }
-          }
-          );
-        } catch (oError) {
-          this.showError(oError.message);
-        }
+          },
+        });
       },
 
       async _loadDeclineDialog() {

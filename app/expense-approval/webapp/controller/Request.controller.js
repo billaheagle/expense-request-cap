@@ -70,8 +70,10 @@ sap.ui.define([
       async _onRouteMatched(oEvent) {
         this._sId = oEvent.getParameter("arguments").ID;
 
-        if (!this._sId) return;
-        this._clearForm();
+        if (!this._sId) {
+          this._clearForm();
+          return;
+        }
 
         try {
           const oData = await this._loadRequest();
@@ -91,7 +93,10 @@ sap.ui.define([
       },
 
       onPageCreateExpenseNavButtonPress() {
-        if (!this._sId) this.onNavBack();
+        if (!this._sId) {
+          this.onNavBack();
+          return;
+        }
 
         this.navTo("requestDetail", { ID: this._sId });
       },
@@ -176,8 +181,12 @@ sap.ui.define([
 
       async onSaveAsDraftButtonPress() {
         try {
-          const sID = await this._draft();
-          await this._activate(sID);
+          if (!this._sId) {
+            const sID = await this._draft();
+            await this._activate(sID);
+          } else {
+            await this._updateDraft();
+          }
           MessageBox.success(this.getText("messageSuccessDraft"), {
             onClose: () => {
               this._clearForm();
@@ -189,11 +198,75 @@ sap.ui.define([
         }
       },
 
+      _draftPath() {
+        return `/ExpenseRequests(ID=${this._sId},IsActiveEntity=false)`;
+      },
+
+      async _discardDraft() {
+        try {
+          const oBinding = this.getModel().bindContext(this._draftPath());
+          await oBinding.requestObject();
+          await oBinding.getBoundContext().delete();
+        } catch (oError) {
+          // tidak ada draft yang tertinggal, abaikan
+        }
+      },
+
+      async _updateDraft() {
+        const oModel = this.getModel();
+        const oHeader = this.getModel("header").getData();
+        const aItems = this.getModel("items").getProperty("/items");
+
+        await this._discardDraft();
+        await this.executeAction(
+          `/ExpenseRequests(ID=${this._sId},IsActiveEntity=true)/ExpenseService.draftEdit(...)`,
+          undefined,
+          { PreserveChanges: true }
+        );
+
+        try {
+          const oBinding = oModel.bindContext(this._draftPath(), null, { $expand: "ExpenseItems" });
+          const oData = await oBinding.requestObject();
+          const oContext = oBinding.getBoundContext();
+
+          oContext.setProperty("Notes", oHeader.ExpenseNotes);
+          oContext.setProperty("Currency_code", oHeader.Currency);
+
+          for (const oItem of oData.ExpenseItems) {
+            const oItemBinding = oModel.bindContext(
+              `${this._draftPath()}/ExpenseItems(ID=${oItem.ID},IsActiveEntity=false)`
+            );
+            await oItemBinding.requestObject();
+            await oItemBinding.getBoundContext().delete();
+          }
+
+          const oList = oModel.bindList("ExpenseItems", oContext);
+          for (const oItem of aItems) {
+            await oList.create({
+              ExpenseType_Code: oItem.ExpenseType_Code,
+              ExpenseDate: oItem.ExpenseDate,
+              Amount: oItem.Amount,
+              Description: oItem.Description
+            }).created();
+          }
+
+          await this._activate(this._sId);
+        } catch (oError) {
+          await this._discardDraft();
+          throw oError;
+        }
+      },
+
       async onSubmitRequestButtonPress() {
         try {
-          const sID = await this._draft();
-          await this._activate(sID);
-          await this._submit(sID);
+          if (!this._sId) {
+            const sID = await this._draft();
+            await this._activate(sID);
+            await this._submit(sID);
+          } else {
+            await this._updateDraft();
+            await this._submit(this._sId);
+          }
           MessageBox.success(this.getText("messageSuccessSubmit"), {
             onClose: () => {
               this._clearForm();
@@ -410,9 +483,5 @@ sap.ui.define([
 
         this._oExpenseTypeDialog.open();
       },
-
-      onUpdateDraftButtonPress() {
-
-      }
     });
   });

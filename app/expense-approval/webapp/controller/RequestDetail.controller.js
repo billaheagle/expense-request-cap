@@ -91,22 +91,31 @@ sap.ui.define([
         return formatter.formatStatusState(sStatus);
       },
 
-      async onApproveButtonPress(oEvent) {
-        const oContext = oEvent.getSource().getBindingContext();
-        if (!oContext) return;
+      _actionPath(sAction) {
+        return `/ExpenseRequests(ID=${this._sId},IsActiveEntity=true)/ExpenseService.${sAction}(...)`;
+      },
 
-        try {
-          await this.executeAction("ExpenseService.approve(...)", oContext);
-          MessageBox.success(
-            this.getText("messageSuccessApprove"), {
-            onClose: () => {
-              this.onPageRequestDetailNavButtonPress();
+      async onApproveButtonPress(oEvent) {
+        if (!this._sId) return;
+
+        MessageBox.confirm(this.getText("messageConfirmApprove"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction(this._actionPath("approve"));
+
+              MessageBox.success(this.getText("messageSuccessApprove"), {
+                onClose: () => {
+                  this.onPageRequestDetailNavButtonPress();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
             }
-          }
-          );
-        } catch (oError) {
-          this.showError(oError.message);
-        }
+          },
+        });
       },
 
       async _loadDeclineDialog() {
@@ -136,8 +145,7 @@ sap.ui.define([
         this._oDeclineDialog.close();
       },
 
-      async onButtonDeclinePress(oEvent) {
-        this._oDeclineContext = oEvent.getSource().getBindingContext();
+      async onDeclineButtonPress(oEvent) {
         await this._loadDeclineDialog();
 
         const oDecline = this._getInitialDecline();
@@ -160,38 +168,50 @@ sap.ui.define([
           Reason: oDecline.Reason
         }
 
-        try {
-          await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
-          this._oDeclineDialog.close();
-          this._clearDeclineForm();
+        MessageBox.confirm(this.getText("messageConfirmDecline"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction(this._actionPath("decline"), undefined, { Reason: oDecline.Reason });
+              this._oDeclineDialog.close();
+              this._clearDeclineForm();
 
-          MessageBox.success(this.getText("messageSuccessDecline"), {
-            onClose: () => {
-              this.onPageRequestDetailNavButtonPress();
+              MessageBox.success(this.getText("messageSuccessDecline"), {
+                onClose: () => {
+                  this.onPageRequestDetailNavButtonPress();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
             }
-          });
-        } catch (oError) {
-          this.showError(oError.message);
-        }
+          },
+        });
 
       },
 
       async onReimburseButtonPress() {
-        const oContext = oEvent.getSource().getBindingContext();
-        if (!oContext) return;
+        if (!this._sId) return;
 
-        try {
-          await this.executeAction("ExpenseService.reimburse(...)", oContext);
-          MessageBox.success(
-            this.getText("messageSuccessReimburse"), {
-            onClose: () => {
-              this.onPageRequestDetailNavButtonPress();
+        MessageBox.confirm(this.getText("messageConfirmReimburse"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction(this._actionPath("reimburse"));
+
+              MessageBox.success(this.getText("messageSuccessReimburse"), {
+                onClose: () => {
+                  this.onPageRequestDetailNavButtonPress();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
             }
-          }
-          );
-        } catch (oError) {
-          this.showError(oError.message);
-        }
+          },
+        });
       },
 
       onEditButtonPress() {

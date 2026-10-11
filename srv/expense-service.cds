@@ -20,7 +20,7 @@ service ExpenseService {
                 'submit'
             ],
             to   : 'employee',
-            where: 'Employee.Email = $user AND Status = `Draft`'
+            where: `Employee.Email = $user AND Status = 'Draft'`
         },
         {
             grant: [
@@ -36,7 +36,8 @@ service ExpenseService {
                 'READ',
                 'reimburse'
             ],
-            to   : 'finance'
+            to   : 'finance',
+            where: `Status = 'Approved' OR Status = 'Reimbursed'`
         }
     ]
     entity ExpenseRequests  as

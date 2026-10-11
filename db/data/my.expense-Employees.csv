@@ -3,3 +3,5 @@ ID,EmployeeNumber,FirstName,LastName,Email,CostCenter,Country_code,Active,Manage
 00000000-0000-0000-0000-000000000002,TST002,User,Manager,manager@company.com,CC-IT,DE,true,
 00000000-0000-0000-0000-000000000003,TST003,User,Employee,employee@company.com,CC-IT,DE,true,00000000-0000-0000-0000-000000000002
 00000000-0000-0000-0000-000000000004,TST004,User,Finance,finance@company.com,CC-FIN,DE,true,
+00000000-0000-0000-0000-000000000005,TST005,User,Manager2,manager2@company.com,CC-OPS,DE,true,
+00000000-0000-0000-0000-000000000006,TST006,User,Employee2,employee2@company.com,CC-OPS,DE,true,00000000-0000-0000-0000-000000000005

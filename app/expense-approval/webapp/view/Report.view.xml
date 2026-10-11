@@ -140,6 +140,7 @@
                                     type="Accept"
                                     press=".onButtonReimbursePress"
                                     tooltip="{i18n>btnReimburse}"
+                                    enabled="{= ${path: 'Status', targetType: 'any'} === 'Approved' }"
                                     visible="{= ${user>/Roles}.indexOf('finance') >= 0 }"
                                 />
                                 <Button
