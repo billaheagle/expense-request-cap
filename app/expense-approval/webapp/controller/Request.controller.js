@@ -292,6 +292,7 @@ sap.ui.define([
 
       async onAddNewItemButtonPress() {
         await this._loadItemDialog();
+        this.byId("idExpenseDateDatePicker").setMaxDate(new Date());
         const oItem = this._getInitialItem();
         const oItemModel = new JSONModel(oItem);
         this._oItemDialog.setModel(oItemModel, "item");
@@ -413,6 +414,9 @@ sap.ui.define([
         const bAmountOk = Number(oItem.Amount) > 0;
         oItem._AmountState = (bAmountOk) ? "None" : "Error";
 
+        const bDateOk = /^\d{4}-\d{2}-\d{2}/.test(oItem.ExpenseDate || "");
+        oItem._ExpenseDateState = bDateOk ? "None" : "Error";
+
         const oType = await this._getExpenseType(oItem.ExpenseType_Code);
         const bOverMax = Boolean(oType)
           && Number(oType.MaxAmount) > 0
@@ -420,7 +424,7 @@ sap.ui.define([
         oItem._JustificationState = (bOverMax && !oItem.Justification) ? "Error" : "None";
 
 
-        oItem._isValid = Boolean(oItem.ExpenseType_Code && oItem.ExpenseDate && bAmountOk
+        oItem._isValid = Boolean(oItem.ExpenseType_Code && bDateOk && bAmountOk
           && !(bOverMax && !oItem.Justification)
         );
 

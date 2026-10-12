@@ -21,9 +21,12 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const aCodes = items.map(i => i.ExpenseType_Code);
       const aExpenseTypes = await SELECT.from(ExpenseTypes).where({ Code: { "IN": aCodes }, Active: true });
 
+      const dMaxDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
       for (const item of items) {
         const oExpenseType = aExpenseTypes.find(t => t.Code === item.ExpenseType_Code);
         if (!oExpenseType) req.reject(400, `Invalid Expense Type ${item.ExpenseType_Code}`);
+        if (item.ExpenseDate && new Date(item.ExpenseDate) > dMaxDate) req.reject(400, `Expense date cannot be in the future`);
         if (!(Number(item.Amount) > 0)) req.reject(400, `Amount must be greater than 0`);
         if (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount) && !item.Justification?.trim())
           req.reject(400, `Justification is required when amount exceeds the maximum of ${oExpenseType.Code}`);
