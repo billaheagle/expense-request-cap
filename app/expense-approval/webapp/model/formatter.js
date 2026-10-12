@@ -26,6 +26,7 @@ sap.ui.define([
                     case "Reimbursed":
                         return "Success";
                     case "Submitted":
+                    case "Inprogress":
                         return "Warning";
                     case "Rejected":
                         return "Error";

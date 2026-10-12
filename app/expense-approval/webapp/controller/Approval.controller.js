@@ -98,7 +98,7 @@ sap.ui.define(
               await this.executeAction("ExpenseService.approve(...)", oContext);
 
               MessageBox.success(this.getText("messageSuccessApprove"), {
-                onClose: () => {
+                onClose: async () => {
                   await this._onRouteMatched();
                 }
               });
@@ -173,7 +173,7 @@ sap.ui.define(
               this._clearForm();
 
               MessageBox.success(this.getText("messageSuccessDecline"), {
-                onClose: () => {
+                onClose: async () => {
                   await this._onRouteMatched();
                 }
               });

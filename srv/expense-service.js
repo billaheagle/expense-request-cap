@@ -121,7 +121,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
           Decision: decision, DecisionDate: new Date(), Reason: sReason
         })
 
-      return { Status: decision };
+      return { Status: sDecision };
     }
 
     this.on('approve', ExpenseRequests, (req) => decide(req, 'Approved'));
