@@ -89,31 +89,17 @@ sap.ui.define(
         const oContext = oEvent.getSource().getBindingContext();
         if (!oContext) return;
 
-        MessageBox.confirm(this.getText("messageConfirmApprove"), {
-          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.OK,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.OK) return;
-            try {
-              await this.executeAction("ExpenseService.approve(...)", oContext);
-
-              MessageBox.success(this.getText("messageSuccessApprove"), {
-                onClose: async () => {
-                  await this._onRouteMatched();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
-          },
+        this.confirmAndRun({
+          confirmKey: "messageConfirmApprove",
+          successKey: "messageSuccessApprove",
+          run: async () => await this.executeAction("ExpenseService.approve(...)", oContext),
+          onSuccess: async () => await this._onRouteMatched()
         });
       },
 
       async _loadDeclineDialog() {
         if (!this._oDeclineDialog) {
-          this._oDeclineDialog = await this.loadFragment({
-            name: "expenseapproval.view.fragments.DeclineDialog"
-          });
+          this._oDeclineDialog = await this.loadDialog("DeclineDialog");
         }
       },
 
@@ -162,25 +148,15 @@ sap.ui.define(
           Reason: oDecline.Reason
         }
 
-        MessageBox.confirm(this.getText("messageConfirmDecline"), {
-          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.OK,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.OK) return;
-            try {
-              await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
-              this._oDeclineDialog.close();
-              this._clearForm();
-
-              MessageBox.success(this.getText("messageSuccessDecline"), {
-                onClose: async () => {
-                  await this._onRouteMatched();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
+        this.confirmAndRun({
+          confirmKey: "messageConfirmDecline",
+          successKey: "messageSuccessDecline",
+          run: async () => {
+            await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
+            this._oDeclineDialog.close();
+            this._clearForm();
           },
+          onSuccess: async () => await this._onRouteMatched()
         });
       },
 

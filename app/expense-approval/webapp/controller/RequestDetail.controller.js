@@ -2,15 +2,17 @@ sap.ui.define([
   "expenseapproval/controller/BaseController",
   "sap/ui/model/json/JSONModel",
   "expenseapproval/model/formatter",
+  "expenseapproval/model/helpers",
   "sap/m/MessageBox"
 ],
   /**
    * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
    * @param   {typeof import("sap/ui/model/json/JSONModel").default} JSONModel
    * @param   {typeof import("expenseapproval/model/formatter").default} formatter
+   * @param   {typeof import("expenseapproval/model/formatter").helpers} helpers
    * @param   {typeof import("sap/m/MessageBox").default} MessageBox
    */
-  function (BaseController, JSONModel, formatter, MessageBox) {
+  function (BaseController, JSONModel, formatter, helpers, MessageBox) {
     "use strict";
 
     return BaseController.extend("expenseapproval.controller.RequestDetail", {
@@ -103,31 +105,17 @@ sap.ui.define([
       async onApproveButtonPress(oEvent) {
         if (!this._sId) return;
 
-        MessageBox.confirm(this.getText("messageConfirmApprove"), {
-          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.OK,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.OK) return;
-            try {
-              await this.executeAction(this._actionPath("approve"));
-
-              MessageBox.success(this.getText("messageSuccessApprove"), {
-                onClose: () => {
-                  this.onPageRequestDetailNavButtonPress();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
-          },
+        this.confirmAndRun({
+          confirmKey: "messageConfirmApprove",
+          successKey: "messageSuccessApprove",
+          run: async () => await this.executeAction(this._actionPath("approve")),
+          onSuccess: () => this.onPageRequestDetailNavButtonPress()
         });
       },
 
       async _loadDeclineDialog() {
         if (!this._oDeclineDialog) {
-          this._oDeclineDialog = await this.loadFragment({
-            name: "expenseapproval.view.fragments.DeclineDialog"
-          });
+          this._oDeclineDialog = await this.loadDialog("DeclineDialog");
         }
       },
 
@@ -169,25 +157,16 @@ sap.ui.define([
         const oDeclineModel = this.getModel("decline")
         const oDecline = oDeclineModel.getData();
 
-        MessageBox.confirm(this.getText("messageConfirmDecline"), {
-          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.OK,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.OK) return;
-            try {
-              await this.executeAction(this._actionPath("decline"), undefined, { Reason: oDecline.Reason });
-              this._oDeclineDialog.close();
-              this._clearDeclineForm();
 
-              MessageBox.success(this.getText("messageSuccessDecline"), {
-                onClose: () => {
-                  this.onPageRequestDetailNavButtonPress();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
+        this.confirmAndRun({
+          confirmKey: "messageConfirmDecline",
+          successKey: "messageSuccessDecline",
+          run: async () => {
+            await this.executeAction(this._actionPath("decline"), undefined, { Reason: oDecline.Reason });
+            this._oDeclineDialog.close();
+            this._clearDeclineForm();
           },
+          onSuccess: () => this.onPageRequestDetailNavButtonPress()
         });
       },
 
@@ -207,23 +186,12 @@ sap.ui.define([
       async onDeleteButtonPress(oEvent) {
         if (!this._sId) return;
 
-        MessageBox.confirm(this.getText("messageConfirmDelete"), {
-          actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.DELETE,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.DELETE) return;
-            try {
-              await this._deleteRequest();
-
-              MessageBox.success(this.getText("messageSuccessDeleteDraft"), {
-                onClose: () => {
-                  this.onPageRequestDetailNavButtonPress();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
-          },
+        this.confirmAndRun({
+          confirmKey: "messageConfirmDelete",
+          successKey: "messageSuccessDeleteDraft",
+          run: async () => await this._deleteRequest(),
+          onSuccess: () => this.onPageRequestDetailNavButtonPress(),
+          action: MessageBox.Action.DELETE
         });
       },
 
@@ -251,27 +219,12 @@ sap.ui.define([
         const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
-        const aOverMaxItems = [];
-
         const aContexts = await this.getModel("masterData")
           .bindList("/ExpenseTypes")
           .requestContexts();
 
         const aExpenseTypes = aContexts.map(oContext => oContext.getObject());
-
-        aItems.forEach(item => {
-          const oExpenseType = aExpenseTypes.find(t => t.Code === item.ExpenseType_Code);
-          if (oExpenseType.MaxAmount && (Number(item.Amount) > Number(oExpenseType.MaxAmount))) {
-            aOverMaxItems.push({
-              ...{
-                Description: item.Description,
-                Amount: Number(item.Amount),
-                MaxAmount: Number(oExpenseType.MaxAmount),
-                Justification: item.Justification
-              }
-            });
-          }
-        })
+        const aOverMaxItems = helpers.getOverMaxItems(aItems, aExpenseTypes);
 
         return {
           TotalRequestedAmount: oHeader.TotalRequestedAmount,
@@ -284,9 +237,7 @@ sap.ui.define([
 
       async _loadReimburseDialog() {
         if (!this._oReimburseDialog) {
-          this._oReimburseDialog = await this.loadFragment({
-            name: "expenseapproval.view.fragments.ReimburseDialog"
-          });
+          this._oReimburseDialog = await this.loadDialog("ReimburseDialogs");
         }
       },
 
@@ -331,25 +282,16 @@ sap.ui.define([
         const oReimburseModel = this.getModel("reimburse");
         const oReimburse = oReimburseModel.getData();
 
-        MessageBox.confirm(this.getText("messageConfirmReimburse"), {
-          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.OK,
-          onClose: async (sAction) => {
-            if (sAction !== MessageBox.Action.OK) return;
-            try {
-              await this.executeAction(this._actionPath("reimburse"), undefined, { TotalAcceptedAmount: oReimburse.TotalAcceptedAmount });
-              this._oReimburseDialog.close();
-              this._clearReimburseForm();
-              
-              MessageBox.success(this.getText("messageSuccessReimburse"), {
-                onClose: () => {
-                  this.onPageRequestDetailNavButtonPress();
-                }
-              });
-            } catch (oError) {
-              this.showError(oError.message)
-            }
+
+        this.confirmAndRun({
+          confirmKey: "messageConfirmReimburse",
+          successKey: "messageSuccessReimburse",
+          run: async () => {
+            await this.executeAction(this._actionPath("reimburse"), undefined, { TotalAcceptedAmount: oReimburse.TotalAcceptedAmount });
+            this._oReimburseDialog.close();
+            this._clearReimburseForm();
           },
+          onSuccess: () => this.onPageRequestDetailNavButtonPress()
         });
       },
     });

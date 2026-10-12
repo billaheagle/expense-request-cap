@@ -79,6 +79,32 @@ sap.ui.define([
 
                 await oAction.execute();
                 return oAction.getBoundContext()?.getObject();
+            },
+
+            confirmAndRun({ confirmKey, successKey, run, onSuccess, action = MessageBox.Action.OK }) {
+                MessageBox.confirm(this.getText(confirmKey), {
+                    actions: [action, MessageBox.Action.CANCEL],
+                    emphasizedAction: action,
+                    onClose: async (sAction) => {
+                        if (sAction !== action) return;
+                        try {
+                            await run();
+                            MessageBox.success(this.getText(successKey), {
+                                onClose: () => onSuccess?.()
+                            });
+                        } catch (oError) {
+                            this.showError(oError.message);
+                        }
+                    }
+                });
+            },
+
+            async loadDialog(sName) {
+                this._mDialogs ??= {};
+                this._mDialogs[sName] ??= await this.loadFragment({
+                    name: `expenseapproval.view.fragments.${sName}`
+                });
+                return this._mDialogs[sName];
             }
         })
     }

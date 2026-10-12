@@ -74,11 +74,11 @@ service ExpenseService {
                 @mandatory Status : String;
             };
 
-            action decline(Reason: String)                        returns {
+            action decline(Reason: String @mandatory)                        returns {
                 @mandatory Status : String;
             };
 
-            action reimburse(TotalAcceptedAmount: Decimal(15, 2)) returns {
+            action reimburse(TotalAcceptedAmount: Decimal(15, 2) @mandatory) returns {
                 @mandatory Status : String;
             };
         };

@@ -284,9 +284,7 @@ sap.ui.define([
 
       async _loadItemDialog() {
         if (!this._oItemDialog) {
-          this._oItemDialog = await this.loadFragment({
-            name: "expenseapproval.view.fragments.ItemDialog"
-          });
+          this._oItemDialog = await this.loadDialog("ItemDialog");
         }
       },
 
@@ -353,22 +351,16 @@ sap.ui.define([
         const oItemsModel = this.getModel("items");
         const aItems = oItemsModel.getProperty("/items");
 
-        MessageBox.confirm(this.getText("messageConfirmDelete"), {
-          actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
-          emphasizedAction: MessageBox.Action.DELETE,
-          onClose: (sAction) => {
-            switch (sAction) {
-              case MessageBox.Action.DELETE:
-                aItems.splice(iIndex, 1);
-                oItemsModel.setProperty("/items", aItems);
-                this._validateHeader();
-                break;
-
-              default:
-                break;
-            }
+        this.confirmAndRun({
+          confirmKey: "messageConfirmDelete",
+          successKey: "messageSuccessDelete",
+          run: () => aItems.splice(iIndex, 1),
+          onSuccess: () => {
+            oItemsModel.setProperty("/items", aItems);
+            this._validateHeader();
           },
-        })
+          action: MessageBox.Action.DELETE
+        });
       },
 
       formatDate(sValue) {
