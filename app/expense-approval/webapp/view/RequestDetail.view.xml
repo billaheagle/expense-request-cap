@@ -72,7 +72,7 @@
                         <Label
                             id="idDetailTotalAcceptedAmountLabel"
                             text="{i18n>labelTotalAcceptedAmount}"
-                            visible="{= ${path: 'Status', targetType: 'any'} === 'Reimbursed' }"
+                            visible="{= ${path: 'header>/Status', targetType: 'any'} === 'Reimbursed' }"
                         />
                         <ObjectNumber
                             id="idDetailTotalAcceptedAmountObjectNumber"
@@ -85,7 +85,7 @@
                                 }
                             }"
                             unit="{header>/Currency}"
-                            visible="{= ${path: 'Status', targetType: 'any'} === 'Reimbursed' }"
+                            visible="{= ${path: 'header>/Status', targetType: 'any'} === 'Reimbursed' }"
                         />
 
                         <Label

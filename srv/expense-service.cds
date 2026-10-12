@@ -88,7 +88,64 @@ service ExpenseService {
         @mandatory Roles : array of String;
     }
 
+    @restrict: [
+        {
+            grant: 'READ',
+            to   : 'employee',
+            where: 'ExpenseRequest.Employee.Email = $user'
+        },
+        {
+            grant: [
+                'CREATE',
+                'UPDATE',
+                'DELETE'
+            ],
+            to   : 'employee',
+            where: `ExpenseRequest.Employee.Email = $user AND ExpenseRequest.Status = 'Draft'`
+        },
+        {
+            grant: 'READ',
+            to   : 'manager',
+            where: `ExpenseRequest.Employee.Manager.Email = $user
+                    or ExpenseRequest.CurrentApprover.Email = $user
+                    or exists ExpenseRequest.ExpenseApprovals[Approver.Email = $user]`
+        },
+        {
+            grant: 'READ',
+            to   : 'finance',
+            where: `ExpenseRequest.Status = 'Approved' OR ExpenseRequest.Status = 'Reimbursed'`
+        }
+    ]
+    entity ExpenseItems     as projection on db.ExpenseItems;
+    
     @readonly
+    @restrict: [
+        {
+            grant: 'READ',
+            to   : 'employee',
+            where: 'ExpenseRequest.Employee.Email = $user'
+        },
+        {
+            grant: 'READ',
+            to   : 'manager',
+            where: `ExpenseRequest.Employee.Manager.Email = $user
+                    or ExpenseRequest.CurrentApprover.Email = $user
+                    or exists ExpenseRequest.ExpenseApprovals[Approver.Email = $user]`
+        },
+        {
+            grant: 'READ',
+            to   : 'finance',
+            where: `ExpenseRequest.Status = 'Approved' OR ExpenseRequest.Status = 'Reimbursed'`
+        }
+    ]
+    entity ExpenseApprovals as projection on db.ExpenseApprovals;
+
+    @readonly
+    @requires: [
+        'employee',
+        'manager',
+        'finance'
+    ]
     entity Employees        as
         projection on db.Employees {
             ID,
@@ -97,7 +154,4 @@ service ExpenseService {
             Email,
             Manager
         };
-
-    @readonly
-    entity ExpenseApprovals as projection on db.ExpenseApprovals;
 }

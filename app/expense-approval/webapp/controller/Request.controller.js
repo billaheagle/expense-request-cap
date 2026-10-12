@@ -333,6 +333,7 @@ sap.ui.define([
 
       async onButtonEditItemPress(oEvent) {
         await this._loadItemDialog();
+        this.byId("idExpenseDateDatePicker").setMaxDate(new Date());
         const iIndex = this._getItemIndex(oEvent);
 
         const oItemsModel = this.getModel("items");

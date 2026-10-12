@@ -116,7 +116,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const oEmployee = await getCurrentEmployee(req);
 
       const sDecision = (decision === 'Approved' && oEmployee.Manager_ID) ? 'Inprogress' : decision;
-      const sCurrentApprover_ID = (decision !== 'Rejected') ? oEmployee.Manager_ID : '';
+      const sCurrentApprover_ID = (decision !== 'Rejected') ? oEmployee.Manager_ID : null;
 
       await UPDATE(ExpenseRequests)
         .set({ Status: sDecision, ApprovalDate: new Date(), Approver_ID: oEmployee.ID, CurrentApprover_ID: sCurrentApprover_ID })
