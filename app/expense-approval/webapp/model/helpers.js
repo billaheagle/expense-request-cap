@@ -14,11 +14,6 @@ sap.ui.define([
                         Justification: oItem.Justification
                     }];
                 });
-            },
-
-            validateDecline(oDecline) {
-                const bValid = Boolean(oDecline.Reason);
-                return { ...oDecline, _ReasonState: bValid ? "None" : "Error", _isValid: bValid };
             }
         }
     });

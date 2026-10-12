@@ -60,7 +60,7 @@ sap.ui.define([
 
         this.getModel("header").setData({
           RequestNumber: oData.RequestNumber,
-          Currency: oData.Currency_code,
+          Currency_code: oData.Currency_code,
           ExpenseNotes: oData.Notes,
           Status: oData.Status,
           CurrentApproverEmail: oData.CurrentApprover?.Email ?? "",
@@ -199,7 +199,7 @@ sap.ui.define([
         return {
           TotalRequestedAmount: 0,
           TotalAmount: 0,
-          Currency: "",
+          Currency_code: "",
           TotalAcceptedAmount: 0,
           OverMaxItems: [
             {
@@ -229,7 +229,7 @@ sap.ui.define([
         return {
           TotalRequestedAmount: oHeader.TotalRequestedAmount,
           TotalAmount: oHeader.TotalAmount,
-          Currency: oHeader.Currency_code,
+          Currency_code: oHeader.Currency_code,
           TotalAcceptedAmount: oHeader.TotalAmount,
           OverMaxItems: aOverMaxItems
         }
@@ -237,7 +237,7 @@ sap.ui.define([
 
       async _loadReimburseDialog() {
         if (!this._oReimburseDialog) {
-          this._oReimburseDialog = await this.loadDialog("ReimburseDialogs");
+          this._oReimburseDialog = await this.loadDialog("ReimburseDialog");
         }
       },
 
