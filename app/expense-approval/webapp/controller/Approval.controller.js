@@ -50,6 +50,10 @@ sap.ui.define(
         oBinding.filter(aFilters);
       },
 
+      onRefreshButtonPress() {
+         this._onRouteMatched();
+      },
+
       async onButtonApprovePress(oEvent) {
         const oContext = oEvent.getSource().getBindingContext();
         if (!oContext) return;

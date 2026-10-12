@@ -45,7 +45,7 @@ sap.ui.define([
         const oBinding = this.getModel().bindContext(
           `/ExpenseRequests(ID=${this._sId},IsActiveEntity=true)`,
           null,
-          { $expand: "ExpenseItems,ExpenseApprovals" },
+          { $expand: "ExpenseItems,ExpenseApprovals,CurrentApprover($select=Email)" },
         );
         return oBinding.requestObject();
       },
@@ -61,6 +61,7 @@ sap.ui.define([
           Currency: oData.Currency_code,
           ExpenseNotes: oData.Notes,
           Status: oData.Status,
+          CurrentApproverEmail: oData.CurrentApprover?.Email ?? "",
           TotalAmount: oData.TotalAmount,
           TotalRequestedAmount: oData.TotalRequestedAmount,
           TotalAcceptedAmount: oData.TotalAcceptedAmount,

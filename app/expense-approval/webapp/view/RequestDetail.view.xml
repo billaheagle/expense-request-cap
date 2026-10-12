@@ -122,8 +122,8 @@
                         press=".onApproveButtonPress"
                         icon="sap-icon://accept"
                         type="Success"
-                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'header>/Status', targetType: 'any'} === 'Submitted' || ${path: 'header>/Status', targetType: 'any'} === 'Inprogress' ) }"
-                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'header>/Status', targetType: 'any'} === 'Submitted' || ${path: 'header>/Status', targetType: 'any'} === 'Inprogress' ) }"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${header>/CurrentApproverEmail} === ${user>/ID} }"
+                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${header>/CurrentApproverEmail} === ${user>/ID} }"
                     />
                     <Button
                         id="idDetailDeclineButton"
@@ -132,8 +132,8 @@
                         class="sapUiSmallMarginBegin"
                         icon="sap-icon://decline"
                         type="Reject"
-                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'header>/Status', targetType: 'any'} === 'Submitted' || ${path: 'header>/Status', targetType: 'any'} === 'Inprogress' ) }"
-                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'header>/Status', targetType: 'any'} === 'Submitted' || ${path: 'header>/Status', targetType: 'any'} === 'Inprogress' ) }"
+                        visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${header>/CurrentApproverEmail} === ${user>/ID} }"
+                        enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${header>/CurrentApproverEmail} === ${user>/ID} }"
                     />
                     <Button
                         id="idDetailReimburseButton"

@@ -41,6 +41,12 @@
                             placeholder="{i18n>placeholderSearchRequestNumberOrNotes}"
                             search=".onSearchFieldApprovalSearch"
                         />
+                        <Button
+                            id="idApprovalRefreshButton"
+                            icon="sap-icon://refresh"
+                            tooltip="{i18n>btnRefresh}"
+                            press=".onRefreshButtonPress"
+                        />
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>

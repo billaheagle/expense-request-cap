@@ -39,6 +39,10 @@ sap.ui.define(
         oBinding.filter(aFilters);
       },
 
+      onRefreshButtonPress() {
+         this._onRouteMatched();
+      },
+
       formatDateTime(sValue) {
         return formatter.formatDateTime(sValue);
       },

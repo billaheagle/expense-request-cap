@@ -44,6 +44,13 @@
                             placeholder="{i18n>placeholderSearchRequestNumberOrNotes}"
                             search=".onSearchFieldReportSearch"
                         />
+                        
+                        <Button
+                            id="idReportRefreshButton"
+                            icon="sap-icon://refresh"
+                            tooltip="{i18n>btnRefresh}"
+                            press=".onRefreshButtonPress"
+                        />
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
@@ -192,8 +199,8 @@
                                     press=".onApproveButtonPress"
                                     icon="sap-icon://accept"
                                     type="Success"
-                                    visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
-                                    enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
+                                    visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'CurrentApprover/Email', targetType: 'any'} === ${user>/ID} }"
+                                    enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'CurrentApprover/Email', targetType: 'any'} === ${user>/ID} }"
                                 />
                                 <Button
                                     id="idReportDeclineButton"
@@ -201,8 +208,8 @@
                                     class="sapUiSmallMarginBegin"
                                     icon="sap-icon://decline"
                                     type="Reject"
-                                    visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
-                                    enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
+                                    visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'CurrentApprover/Email', targetType: 'any'} === ${user>/ID} }"
+                                    enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ${path: 'CurrentApprover/Email', targetType: 'any'} === ${user>/ID} }"
                                 />
                                 <Button
                                     id="idReimbrseButton"
