@@ -35,6 +35,9 @@
 
                     <GenericTile
                         id="idReportGenericTile"
+                        visible="{= ${user>/Roles}.indexOf('employee') >= 0
+                                    || ${user>/Roles}.indexOf('manager') >= 0
+                                    || ${user>/Roles}.indexOf('finance') >= 0 }"
                         header="{i18n>homeReportExpenseTile}"
                         press=".onGenericTileReportPress"
                         class="sapUiSmallMarginBegin"

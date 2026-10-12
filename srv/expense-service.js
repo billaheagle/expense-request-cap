@@ -24,6 +24,10 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       for (const item of items) {
         const oExpenseType = aExpenseTypes.find(t => t.Code === item.ExpenseType_Code);
         if (!oExpenseType) req.reject(400, `Invalid Expense Type ${item.ExpenseType_Code}`);
+        if (!(Number(item.Amount) > 0)) req.reject(400, `Amount must be greater than 0`);
+        if (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount) && !item.Justification?.trim())
+          req.reject(400, `Justification is required when amount exceeds the maximum of ${oExpenseType.Code}`);
+
         nTotalAmount += (Number(oExpenseType.MaxAmount) > 0 && Number(item.Amount) > Number(oExpenseType.MaxAmount))
           ? Number(oExpenseType.MaxAmount) : Number(item.Amount);
         nTotalRequestedAmount += Number(item.Amount);
