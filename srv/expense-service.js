@@ -104,10 +104,10 @@ module.exports = class ExpenseService extends cds.ApplicationService {
 
       const oEmployee = await getCurrentEmployee(req);
 
-      if (decision === 'Approved' && oEmployee.Manager_ID) decision = 'Inprogress';
+      const sDecision = (decision === 'Approved' && oEmployee.Manager_ID) ? 'Inprogress' : decision;
 
       await UPDATE(ExpenseRequests)
-        .set({ Status: decision, ApprovalDate: new Date(), Approver_ID: oEmployee.ID, CurrentApprover: oEmployee.Manager_ID })
+        .set({ Status: sDecision, ApprovalDate: new Date(), Approver_ID: oEmployee.ID, CurrentApprover_ID: oEmployee.Manager_ID })
         .where({ ID });
 
       await INSERT.into(ExpenseApprovals)
