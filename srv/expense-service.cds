@@ -50,6 +50,7 @@ service ExpenseService {
         projection on db.ExpenseRequests {
             *,
             RequestNumber        @readonly,
+            Notes                @mandatory,
             Employee             @readonly,
             Status               @readonly,
             SubmissionDate       @readonly,

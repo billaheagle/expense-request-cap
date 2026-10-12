@@ -3,18 +3,27 @@ sap.ui.define(
     "expenseapproval/controller/BaseController",
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/FilterType",
     "expenseapproval/model/formatter"
   ],
   /**
    * @param   {typeof import("expenseapproval/controller/BaseController").default} BaseController
    * @param   {typeof import("sap/m/MessageBox").default} MessageBox
    * @param   {typeof import("sap/ui/model/json/JSONModel").default} JSONModel
+   * @param   {typeof import("sap/ui/model/Filter").default} Filter
+   * @param   {typeof import("sap/ui/model/FilterOperator").default} FilterOperator
+   * @param   {typeof import("sap/ui/model/FilterType").default} FilterType
    * @param   {typeof import("expenseapproval/model/formatter").default} formatter
    */
   (
     BaseController,
     MessageBox,
     JSONModel,
+    Filter,
+    FilterOperator,
+    FilterType,
     formatter
   ) => {
     "use strict";
@@ -26,9 +35,31 @@ sap.ui.define(
           .attachPatternMatched(this._onRouteMatched, this);
       },
 
-      _onRouteMatched() {
-        const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
-        oTable?.getBinding("items")?.refresh();
+      _getUserId() {
+        const oUserModel = this.getModel("user");
+        const sId = oUserModel.getProperty("/ID");
+        if (sId) return Promise.resolve(sId);
+
+        return new Promise((resolve) => {
+          const oBinding = oUserModel.bindProperty("/ID");
+          oBinding.attachChange(() => {
+            const sNewId = oBinding.getValue();
+            if (!sNewId) return;
+            oBinding.destroy();
+            resolve(sNewId);
+          });
+        });
+      },
+
+      async _onRouteMatched() {
+        const oBinding = this.byId("idExpenseRequestsSubmittedRequestsTable")?.getBinding("items");
+        if (!oBinding) return;
+
+        const sUserId = await this._getUserId();
+        oBinding.filter(new Filter("CurrentApprover/Email", FilterOperator.EQ, sUserId), FilterType.Application);
+
+        if (oBinding.isSuspended()) oBinding.resume();
+        else oBinding.refresh();
       },
 
       _getInitialDecline() {
@@ -47,11 +78,11 @@ sap.ui.define(
         const aFilters = this.createSearchFilter(sQuery, aPaths);
         const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
         const oBinding = oTable.getBinding("items");
-        oBinding.filter(aFilters);
+        oBinding.filter(aFilters, FilterType.Control);
       },
 
-      onRefreshButtonPress() {
-         this._onRouteMatched();
+      async onRefreshButtonPress() {
+        await this._onRouteMatched();
       },
 
       async onButtonApprovePress(oEvent) {
@@ -68,7 +99,7 @@ sap.ui.define(
 
               MessageBox.success(this.getText("messageSuccessApprove"), {
                 onClose: () => {
-                  this._onRouteMatched();
+                  await this._onRouteMatched();
                 }
               });
             } catch (oError) {
@@ -143,7 +174,7 @@ sap.ui.define(
 
               MessageBox.success(this.getText("messageSuccessDecline"), {
                 onClose: () => {
-                  this._onRouteMatched();
+                  await this._onRouteMatched();
                 }
               });
             } catch (oError) {

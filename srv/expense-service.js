@@ -86,7 +86,11 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       const requestNumber = await getNextRequestNumber(req);
 
       await UPDATE(ExpenseRequests)
-        .set({ Status: 'Submitted', SubmissionDate: new Date(), TotalAmount: nTotalAmount, TotalRequestedAmount: nTotalRequestedAmount, RequestNumber: requestNumber })
+        .set({
+          Status: 'Submitted', SubmissionDate: new Date(), TotalAmount: nTotalAmount,
+          TotalRequestedAmount: nTotalRequestedAmount, RequestNumber: requestNumber,
+          CurrentApprover_ID: oEmployee.Manager_ID
+        })
         .where({ ID });
 
       return { Status: 'Submitted' };
@@ -130,7 +134,7 @@ module.exports = class ExpenseService extends cds.ApplicationService {
       if (!oExpenseRequest) req.reject(404, 'Request not found');
 
       const totalAcceptedAmount = Number(req.data.TotalAcceptedAmount);
-      if (totalAcceptedAmount <= 0) req.reject(400, "Total accepted amount must greather than 0");
+      if (!(totalAcceptedAmount > 0)) req.reject(400, "Total accepted amount must greather than 0");
       if (totalAcceptedAmount > Number(oExpenseRequest.TotalRequestedAmount)) req.reject(400, "Total accepted amount maximum is equal with total requested amount");
 
       if (oExpenseRequest.Status !== 'Approved') req.reject(409, `Only approved requests can be reimbursed`);

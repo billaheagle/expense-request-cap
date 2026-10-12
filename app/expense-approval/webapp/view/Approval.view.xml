@@ -15,11 +15,7 @@
                 width="auto"
                 items="{
                     path: '/ExpenseRequests',
-                    filters: {
-                        path: 'Status',
-                        operator: 'EQ',
-                        value1: 'Submitted'
-                    },
+                    suspended: true,
                     sorter: {
                         path: 'SubmissionDate',
                         descending: false
