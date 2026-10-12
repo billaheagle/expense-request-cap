@@ -5,7 +5,11 @@
 >
     <Page
         id="idReportPage"
-        title="{i18n>reportTitle}"
+        title="{= ${user>/Roles}.indexOf('finance') >= 0
+                ? ${i18n>reportTitleFinance}
+                : ${user>/Roles}.indexOf('manager') >= 0
+                    ? ${i18n>reportTitleManager}
+                    : ${i18n>reportTitle} }"
         showNavButton="true"
         navButtonPress=".onPageReportExpenseNavButtonPress"
     >
@@ -27,7 +31,11 @@
                     <OverflowToolbar id="idReportOverflowToolbar">
                         <Title
                             id="idRequestsReportToolbarTitle"
-                            text="{i18n>reportContentTitle}"
+                            text="{= ${user>/Roles}.indexOf('finance') >= 0
+                                    ? ${i18n>reportContentTitleFinance}
+                                    : ${user>/Roles}.indexOf('manager') >= 0
+                                        ? ${i18n>reportContentTitleManager}
+                                        : ${i18n>reportContentTitle} }"
                         />
                         <ToolbarSpacer id="idReportToolbarSpacer" />
                         <SearchField
@@ -77,6 +85,7 @@
                     <Column
                         id="idTotalAmountColumn"
                         hAlign="End"
+                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 }"
                     >
                         <Text
                             id="idTotalAmountColumnText"
@@ -104,7 +113,7 @@
                     <Column
                         id="idActionsReportColumn"
                         hAlign="End"
-                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 || ${user>/Roles}.indexOf('employee') >= 0 }"
+                        visible="{= ${user>/Roles}.indexOf('finance') >= 0 || ${user>/Roles}.indexOf('employee') >= 0 || ${user>/Roles}.indexOf('manager') >= 0}"
                     >
                         <Text
                             id="idActionsReportColumnText"
@@ -154,6 +163,7 @@
                                     }
                                 }"
                                 unit="{Currency_code}"
+                                visible="{= ${user>/Roles}.indexOf('finance') >= 0 }"
                             />
                             <ObjectNumber
                                 id="idTotalAcceptedAmountObjectNumber"
@@ -177,6 +187,23 @@
                                 id="idReportActionsHBox"
                                 justifyContent="End"
                             >
+                                <Button
+                                    id="idReportApproveButton"
+                                    press=".onApproveButtonPress"
+                                    icon="sap-icon://accept"
+                                    type="Success"
+                                    visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
+                                    enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
+                                />
+                                <Button
+                                    id="idReportDeclineButton"
+                                    press=".onDeclineButtonPress"
+                                    class="sapUiSmallMarginBegin"
+                                    icon="sap-icon://decline"
+                                    type="Reject"
+                                    visible="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
+                                    enabled="{= ${user>/Roles}.indexOf('manager') >= 0 &amp;&amp; ( ${path: 'Status', targetType: 'any'} === 'Submitted' || ${path: 'Status', targetType: 'any'} === 'Inprogress' ) }"
+                                />
                                 <Button
                                     id="idReimbrseButton"
                                     icon="sap-icon://money-bills"

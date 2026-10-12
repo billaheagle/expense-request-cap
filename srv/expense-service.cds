@@ -24,12 +24,18 @@ service ExpenseService {
         },
         {
             grant: [
-                'READ',
                 'approve',
                 'decline'
             ],
             to   : 'manager',
-            where: 'Employee.Manager.Email = $user'
+            where: 'CurrentApprover.Email = $user'
+        },
+        {
+            grant: 'READ',
+            to   : 'manager',
+            where: `Employee.Manager.Email = $user
+                    or CurrentApprover.Email = $user
+                    or exists ExpenseApprovals[Approver.Email = $user]`
         },
         {
             grant: [
@@ -49,6 +55,7 @@ service ExpenseService {
             SubmissionDate       @readonly,
             ApprovalDate         @readonly,
             Approver             @readonly,
+            CurrentApprover      @readonly,
             TotalAmount          @readonly,
             TotalRequestedAmount @readonly,
             TotalAcceptedAmount  @readonly,

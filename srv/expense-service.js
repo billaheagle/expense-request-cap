@@ -6,9 +6,9 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     const { Employees, NumberRanges, ExpenseTypes } = cds.entities('my.expense')
 
     async function getCurrentEmployee(req) {
-      const employee = await SELECT.one.from(Employees).where({ Email: req.user.id });
-      if (!employee) req.reject(403, 'Employee not found');
-      return employee;
+      const oEmployee = await SELECT.one.from(Employees).where({ Email: req.user.id });
+      if (!oEmployee) req.reject(403, 'Employee not found');
+      return oEmployee;
     }
 
     this.on("userInfo", req => ({ ID: req.user.id, Roles: Object.keys(req.user.roles) }));
@@ -33,17 +33,17 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     }
 
     async function getNextRequestNumber(req) {
-      const year = String(new Date().getFullYear());
+      const sYear = String(new Date().getFullYear());
 
-      const iUpdated = await UPDATE(NumberRanges).set({ LastNumber: { '+=': 1 } }).where({ Year: year });
-      if (iUpdated === 0) req.reject(500, `Number range for ${year} is not maintained`);
-      const oNumberRange = await SELECT.one.from(NumberRanges).where({ Year: year });
-      return `REQ-${year}-${String(oNumberRange.LastNumber).padStart(6, "0")}`
+      const iUpdated = await UPDATE(NumberRanges).set({ LastNumber: { '+=': 1 } }).where({ Year: sYear });
+      if (iUpdated === 0) req.reject(500, `Number range for ${sYear} is not maintained`);
+      const oNumberRange = await SELECT.one.from(NumberRanges).where({ Year: sYear });
+      return `REQ-${sYear}-${String(oNumberRange.LastNumber).padStart(6, "0")}`
     }
 
     this.before('CREATE', ExpenseRequests, async (req) => {
-      const employee = await getCurrentEmployee(req);
-      req.data.Employee_ID = employee.ID;
+      const oEmployee = await getCurrentEmployee(req);
+      req.data.Employee_ID = oEmployee.ID;
 
       const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, req.data.ExpenseItems);
       req.data.TotalAmount = nTotalAmount;
@@ -52,15 +52,15 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     });
 
     this.before('UPDATE', ExpenseRequests, async (req) => {
-      const expenseRequest = await SELECT.one.from(req.subject)
-      if (!expenseRequest) req.reject(404, 'Request not found');
+      const oExpenseRequest = await SELECT.one.from(req.subject)
+      if (!oExpenseRequest) req.reject(404, 'Request not found');
 
-      if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be edited`);
+      if (oExpenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be edited`);
 
-      const employee = await getCurrentEmployee(req);
+      const oEmployee = await getCurrentEmployee(req);
 
-      if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Edit`);
-      req.data.Employee_ID = employee.ID;
+      if (oExpenseRequest.Employee_ID !== oEmployee.ID) req.reject(403, `Only owner can Edit`);
+      req.data.Employee_ID = oEmployee.ID;
 
       const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, req.data.ExpenseItems);
       req.data.TotalAmount = nTotalAmount;
@@ -71,16 +71,16 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     this.on('submit', ExpenseRequests, async (req) => {
       const ID = req.params[0].ID;
 
-      const expenseRequest = await SELECT.one.from(req.subject)
-      if (!expenseRequest) req.reject(404, 'Request not found');
+      const oExpenseRequest = await SELECT.one.from(req.subject)
+      if (!oExpenseRequest) req.reject(404, 'Request not found');
 
-      if (expenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be submitted`);
+      if (oExpenseRequest.Status !== 'Draft') req.reject(409, `Only draft requests can be submitted`);
 
-      const employee = await getCurrentEmployee(req);
+      const oEmployee = await getCurrentEmployee(req);
 
-      if (expenseRequest.Employee_ID !== employee.ID) req.reject(403, `Only owner can Submit`);
+      if (oExpenseRequest.Employee_ID !== oEmployee.ID) req.reject(403, `Only owner can Submit`);
 
-      const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: expenseRequest.ID });
+      const expenseItems = await SELECT.from(ExpenseItems).where({ ExpenseRequest_ID: oExpenseRequest.ID });
       if (expenseItems.length === 0) req.reject(400, 'Request must have minimum 1 Expense Item');
       const { nTotalAmount, nTotalRequestedAmount } = await sumItems(req, expenseItems);
       const requestNumber = await getNextRequestNumber(req);
@@ -95,23 +95,25 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     async function decide(req, decision) {
       const ID = req.params[0].ID;
 
-      const expenseRequest = await SELECT.one.from(req.subject)
-      if (!expenseRequest) req.reject(404, 'Request not found');
+      const oExpenseRequest = await SELECT.one.from(req.subject)
+      if (!oExpenseRequest) req.reject(404, 'Request not found');
 
-      if (expenseRequest.Status !== 'Submitted') req.reject(409, `Only submitted requests can be ${decision.toLowerCase()}`);
-      const reason = req.data.Reason?.trim();
-      if (decision === 'Rejected' && !reason) req.reject(400, 'Reject must fill reason');
+      if (oExpenseRequest.Status !== 'Submitted' && oExpenseRequest.Status !== 'Inprogress') req.reject(409, `Only submitted requests can be ${decision.toLowerCase()}`);
+      const sReason = req.data.Reason?.trim();
+      if (decision === 'Rejected' && !sReason) req.reject(400, 'Reject must fill reason');
 
-      const employee = await getCurrentEmployee(req);
+      const oEmployee = await getCurrentEmployee(req);
+
+      if (decision === 'Approved' && oEmployee.Manager_ID) decision = 'Inprogress';
 
       await UPDATE(ExpenseRequests)
-        .set({ Status: decision, ApprovalDate: new Date(), Approver_ID: employee.ID })
+        .set({ Status: decision, ApprovalDate: new Date(), Approver_ID: oEmployee.ID, CurrentApprover: oEmployee.Manager_ID })
         .where({ ID });
 
       await INSERT.into(ExpenseApprovals)
         .entries({
-          ExpenseRequest_ID: ID, Approver_ID: employee.ID,
-          Decision: decision, DecisionDate: new Date(), Reason: reason
+          ExpenseRequest_ID: ID, Approver_ID: oEmployee.ID,
+          Decision: decision, DecisionDate: new Date(), Reason: sReason
         })
 
       return { Status: decision };
@@ -123,16 +125,19 @@ module.exports = class ExpenseService extends cds.ApplicationService {
     this.on('reimburse', ExpenseRequests, async (req) => {
       const ID = req.params[0].ID;
 
-      const expenseRequest = await SELECT.one.from(req.subject)
-      if (!expenseRequest) req.reject(404, 'Request not found');
+      const oExpenseRequest = await SELECT.one.from(req.subject)
+      if (!oExpenseRequest) req.reject(404, 'Request not found');
 
-      if (expenseRequest.Status !== 'Approved') req.reject(409, `Only approved requests can be reimbursed`);
-
-      const employee = await getCurrentEmployee(req);
       const totalAcceptedAmount = Number(req.data.TotalAcceptedAmount);
+      if (totalAcceptedAmount <= 0) req.reject(400, "Total accepted amount must greather than 0");
+      if (totalAcceptedAmount > Number(oExpenseRequest.TotalRequestedAmount)) req.reject(400, "Total accepted amount maximum is equal with total requested amount");
+
+      if (oExpenseRequest.Status !== 'Approved') req.reject(409, `Only approved requests can be reimbursed`);
+
+      const oEmployee = await getCurrentEmployee(req);
 
       await UPDATE(ExpenseRequests)
-        .set({ Status: 'Reimbursed', ReimbursedDate: new Date(), ReimbursedBy_ID: employee.ID, TotalAcceptedAmount: totalAcceptedAmount })
+        .set({ Status: 'Reimbursed', ReimbursedDate: new Date(), ReimbursedBy_ID: oEmployee.ID, TotalAcceptedAmount: totalAcceptedAmount })
         .where({ ID });
 
       return { Status: 'Reimbursed' };

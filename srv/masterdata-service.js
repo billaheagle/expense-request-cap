@@ -6,11 +6,11 @@ module.exports = class MasterDataService extends cds.ApplicationService {
     const { ExpenseRequests, ExpenseItems } = cds.entities('my.expense');
 
     async function assertUnique(req, sField) {
-      const value = req.data[sField];
-      if (!value) return;
+      const vValue = req.data[sField];
+      if (!vValue) return;
 
-      const oEmployee = await SELECT.one.from(Employees).where({ [sField]: value });
-      if (oEmployee && oEmployee.ID !== req.data.ID) req.reject(409, `Employee with ${sField} '${value}' already exists`);
+      const oEmployee = await SELECT.one.from(Employees).where({ [sField]: vValue });
+      if (oEmployee && oEmployee.ID !== req.data.ID) req.reject(409, `Employee with ${sField} '${vValue}' already exists`);
     }
 
     this.before(['CREATE', 'UPDATE'], Employees, async (req) => {

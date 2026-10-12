@@ -336,9 +336,10 @@ sap.ui.define([
           onClose: async (sAction) => {
             if (sAction !== MessageBox.Action.OK) return;
             try {
-              console.log(oReimburse.TotalAcceptedAmount)
               await this.executeAction(this._actionPath("reimburse"), undefined, { TotalAcceptedAmount: oReimburse.TotalAcceptedAmount });
-
+              this._oReimburseDialog.close();
+              this._clearReimburseForm();
+              
               MessageBox.success(this.getText("messageSuccessReimburse"), {
                 onClose: () => {
                   this.onPageRequestDetailNavButtonPress();

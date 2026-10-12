@@ -44,7 +44,11 @@
                                 <content>
                                     <Text
                                         id="idViewYourExpensesText"
-                                        text="{i18n>homeReportExpenseTileContent}"
+                                        text="{= ${user>/Roles}.indexOf('finance') >= 0
+                                                ? ${i18n>homeReportExpenseTileContentFinance}
+                                                : ${user>/Roles}.indexOf('manager') >= 0
+                                                    ? ${i18n>homeReportExpenseTileContentManager}
+                                                    : ${i18n>homeReportExpenseTileContent} }"
                                     />
                                 </content>
                             </TileContent>

@@ -61,12 +61,10 @@ sap.ui.define(
             if (sAction !== MessageBox.Action.OK) return;
             try {
               await this.executeAction("ExpenseService.approve(...)", oContext);
-              const oTable = this.byId("idExpenseRequestsSubmittedRequestsTable");
-              const oBinding = oTable.getBinding("items");
 
               MessageBox.success(this.getText("messageSuccessApprove"), {
                 onClose: () => {
-                  oBinding.refresh();
+                  this._onRouteMatched();
                 }
               });
             } catch (oError) {
@@ -149,7 +147,6 @@ sap.ui.define(
             }
           },
         });
-
       },
 
       formatDateTime(sValue) {

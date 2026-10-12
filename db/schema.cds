@@ -10,6 +10,7 @@ using {
 type Status   : String enum {
     Draft = 'Draft';
     Submitted = 'Submitted';
+    Inprogress = 'Inprogress';
     Approved = 'Approved';
     Rejected = 'Rejected';
     Reimbursed = 'Reimbursed';
@@ -54,6 +55,7 @@ entity ExpenseRequests : cuid, managed {
     SubmissionDate       : DateTime;
     ApprovalDate         : DateTime;
     Approver             : Association to Employees;
+    CurrentApprover      : Association to Employees;
     TotalAmount          : Decimal(15, 2) default 0 not null;
     TotalRequestedAmount : Decimal(15, 2) default 0 not null;
     TotalAcceptedAmount  : Decimal(15, 2) default 0 not null;

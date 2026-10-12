@@ -200,5 +200,111 @@ sap.ui.define(
           },
         });
       },
+
+      async onApproveButtonPress(oEvent) {
+        const oContext = oEvent.getSource().getBindingContext();
+        if (!oContext) return;
+
+        MessageBox.confirm(this.getText("messageConfirmApprove"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction("ExpenseService.approve(...)", oContext);
+
+              MessageBox.success(this.getText("messageSuccessApprove"), {
+                onClose: () => {
+                  this._onRouteMatched();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
+            }
+          },
+        });
+      },
+
+      _getInitialDecline() {
+        return {
+          Reason: "",
+        }
+      },
+
+      async _loadDeclineDialog() {
+        if (!this._oDeclineDialog) {
+          this._oDeclineDialog = await this.loadFragment({
+            name: "expenseapproval.view.fragments.DeclineDialog"
+          });
+        }
+      },
+
+      _validateDecline() {
+        const oDeclineModel = this.getModel("decline");
+        const oDecline = oDeclineModel.getData();
+
+        oDecline._ReasonState = (oDecline.Reason) ? "None" : "Error";
+        oDecline._isValid = Boolean(oDecline.Reason);
+
+        oDeclineModel.refresh();
+      },
+
+      onReasonInputLiveChange() {
+        this._validateDecline();
+      },
+
+      onCancelButtonDeclineDialogPress() {
+        this._clearForm();
+        this._oDeclineDialog.close();
+      },
+
+      async onDeclineButtonPress(oEvent) {
+        this._oDeclineContext = oEvent.getSource().getBindingContext();
+        await this._loadDeclineDialog();
+
+        const oDecline = this._getInitialDecline();
+        const oDeclineModel = new JSONModel(oDecline);
+        this.setModel(oDeclineModel, 'decline');
+        this._oDeclineDialog.open();
+      },
+
+      _clearForm() {
+        const oDecline = this._getInitialDecline();
+        const oDeclineModel = this.getModel("decline");
+        oDeclineModel.setData(oDecline);
+      },
+
+      async onDeclineButtonDeclineDialogPress() {
+        if (!this._oDeclineContext) return;
+
+        const oDeclineModel = this.getModel("decline")
+        const oDecline = oDeclineModel.getData();
+
+        const mParams = {
+          Reason: oDecline.Reason
+        }
+
+        MessageBox.confirm(this.getText("messageConfirmDecline"), {
+          actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+          emphasizedAction: MessageBox.Action.OK,
+          onClose: async (sAction) => {
+            if (sAction !== MessageBox.Action.OK) return;
+            try {
+              await this.executeAction("ExpenseService.decline(...)", this._oDeclineContext, mParams);
+              this._oDeclineDialog.close();
+              this._clearForm();
+
+              MessageBox.success(this.getText("messageSuccessDecline"), {
+                onClose: () => {
+                  this._onRouteMatched();
+                }
+              });
+            } catch (oError) {
+              this.showError(oError.message)
+            }
+          },
+        });
+
+      },
     });
   });
