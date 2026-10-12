@@ -75,7 +75,7 @@ sap.ui.define(
         return {
           TotalRequestedAmount: 0,
           TotalAmount: 0,
-          Currency: "",
+          Currency_code: "",
           TotalAcceptedAmount: 0,
           OverMaxItems: [
             {
@@ -104,7 +104,7 @@ sap.ui.define(
         return {
           TotalRequestedAmount: oHeader.TotalRequestedAmount,
           TotalAmount: oHeader.TotalAmount,
-          Currency: oHeader.Currency_code,
+          Currency_code: oHeader.Currency_code,
           TotalAcceptedAmount: oHeader.TotalAmount,
           OverMaxItems: aOverMaxItems
         }

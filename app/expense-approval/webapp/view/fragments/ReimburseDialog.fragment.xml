@@ -37,7 +37,7 @@
                             type: 'sap.ui.model.odata.type.Decimal',
                             formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 }
                         }"
-                        unit="{reimburse>/Currency}"
+                        unit="{reimburse>/Currency_code}"
                     />
                 </HBox>
 
@@ -58,7 +58,7 @@
                             type: 'sap.ui.model.odata.type.Decimal',
                             formatOptions: { minFractionDigits: 2, maxFractionDigits: 2 }
                         }"
-                        unit="{reimburse>/Currency}"
+                        unit="{reimburse>/Currency_code}"
                     />
                 </HBox>
 

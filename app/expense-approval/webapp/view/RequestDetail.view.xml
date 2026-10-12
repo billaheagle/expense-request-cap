@@ -40,7 +40,7 @@
                         />
                         <Text
                             id="idDetailCurrencyText"
-                            text="{header>/Currency}"
+                            text="{header>/Currency_code}"
                         />
 
                         <Label
@@ -66,7 +66,7 @@
                                     maxFractionDigits: 2
                                 }
                             }"
-                            unit="{header>/Currency}"
+                            unit="{header>/Currency_code}"
                         />
 
                         <Label
@@ -84,7 +84,7 @@
                                     maxFractionDigits: 2
                                 }
                             }"
-                            unit="{header>/Currency}"
+                            unit="{header>/Currency_code}"
                             visible="{= ${path: 'header>/Status', targetType: 'any'} === 'Reimbursed' }"
                         />
 
